@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>CUT PROTOCOL</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="/cut-protocol/manifest.json">
+<link rel="icon" href="/cut-protocol/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -302,7 +302,7 @@ async function resetAll(){
   }catch(e){}
   render();
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.register('/cut-protocol/sw.js').catch(()=>{});
   }
 })();
 </script>

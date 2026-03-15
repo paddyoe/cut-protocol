@@ -1,5 +1,5 @@
 const CACHE_NAME = "cut-protocol-v1";
-const ASSETS = ["/", "/index.html", "/manifest.json", "/icon-192.png", "/icon-512.png"];
+const ASSETS = ["/cut-protocol/", "/cut-protocol/index.html", "/cut-protocol/manifest.json", "/cut-protocol/icon-192.png", "/cut-protocol/icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS)));
@@ -17,6 +17,6 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   e.respondWith(
-    caches.match(e.request).then((r) => r || fetch(e.request).catch(() => caches.match("/")))
+    caches.match(e.request).then((r) => r || fetch(e.request).catch(() => caches.match("/cut-protocol/")))
   );
 });
