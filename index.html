@@ -22,10 +22,11 @@ body{background:#0a0a0a;color:#e0e0e0;font-family:'JetBrains Mono','SF Mono','Fi
 .totals .t{text-align:center}
 .totals .tv{font-size:22px;font-weight:700}
 .totals .tl{font-size:10px;color:#666;text-transform:uppercase}
-.adj{display:flex;gap:6px;margin-bottom:16px;align-items:center}
-.adj .al{font-size:10px;color:#555;text-transform:uppercase;margin-right:4px;flex-shrink:0}
-.adj button{padding:4px 10px;font-size:11px;font-family:inherit;cursor:pointer;font-weight:700;border:1px solid #333;background:#1a1a1a;color:#666}
-.adj button.active{background:#e74c3c;border-color:#c0392b;color:#fff}
+.status-bar{background:#111;border:1px solid #222;padding:10px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.status-bar .tag{font-size:10px;padding:3px 8px;font-weight:700;font-family:inherit;border-radius:2px}
+.tag-ok{background:#0a1f0a;border:1px solid #2ecc71;color:#2ecc71}
+.tag-warn{background:#1f1a0a;border:1px solid #f39c12;color:#f39c12}
+.tag-cut{background:#1f0a0a;border:1px solid #e74c3c;color:#e74c3c}
 .meal{background:#111;border:1px solid #222;margin-bottom:10px;padding:14px 18px}
 .meal .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .meal .mn{font-size:14px;font-weight:700;color:#fff}
@@ -56,6 +57,7 @@ body{background:#0a0a0a;color:#e0e0e0;font-family:'JetBrains Mono','SF Mono','Fi
 .eval{margin-bottom:10px;padding:14px 18px}
 .eval.ok{background:#0a1f0a;border:1px solid #2ecc71}
 .eval.no{background:#1f0a0a;border:1px solid #e74c3c}
+.eval.wait{background:#1f1a0a;border:1px solid #f39c12}
 .eval .ev{font-size:13px;font-weight:700}
 .eval .ed{font-size:11px;color:#888;margin-top:4px}
 textarea{width:100%;background:#111;border:1px solid #222;color:#aaa;padding:8px;font-size:12px;font-family:inherit;min-height:36px;resize:vertical;outline:none;box-sizing:border-box;margin-top:4px}
@@ -66,7 +68,6 @@ textarea{width:100%;background:#111;border:1px solid #222;color:#aaa;padding:8px
 .footer{display:flex;justify-content:space-between;align-items:center;margin-top:24px;border-top:1px solid #1a1a1a;padding-top:12px}
 .footer .fr{font-size:10px;color:#333}
 .footer button{background:none;border:none;color:#2a2a2a;font-size:10px;font-family:inherit;cursor:pointer;padding:4px 8px}
-.hidden{display:none}
 </style>
 </head>
 <body>
@@ -80,7 +81,7 @@ async function dbGet(k){const db=await openDB();return new Promise((res,rej)=>{c
 async function dbSet(k,v){const db=await openDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite').objectStore('kv').put(v,k);t.onsuccess=()=>res();t.onerror=()=>rej(t.error)})}
 async function dbDel(k){const db=await openDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite').objectStore('kv').delete(k);t.onsuccess=()=>res();t.onerror=()=>rej(t.error)})}
 
-// ─── DATA ───────────────────────────────────────────────
+// ─── FOOD DATA ──────────────────────────────────────────
 const PROTEIN_A=[
   {food:"Hähnchenbrust",amt:250,unit:"g (roh)",p:55,f:5,k:0,kcal:275},
   {food:"Putenbrust",amt:250,unit:"g (roh)",p:55,f:3,k:0,kcal:250},
@@ -91,10 +92,11 @@ const PROTEIN_B=[
   {food:"Forelle",amt:180,unit:"g (roh)",p:36,f:14,k:0,kcal:280},
   {food:"Kabeljau",amt:200,unit:"g (roh)",p:36,f:2,k:0,kcal:165}
 ];
-const CARB_OPT=[
-  {food:"Reis",amt:70,unit:"g (roh)",p:5,f:1,k:55,kcal:250},
-  {food:"Nudeln",amt:70,unit:"g (roh)",p:8,f:2,k:48,kcal:250},
-  {food:"Kartoffeln",amt:210,unit:"g",p:4,f:0,k:34,kcal:155}
+// Per-gram macros for dynamic carb calculation
+const CARB_BASE=[
+  {food:"Reis",baseAmt:80,unit:"g (roh)",pG:0.07,fG:0.01,kG:0.78,kcG:3.58},
+  {food:"Nudeln",baseAmt:80,unit:"g (roh)",pG:0.11,fG:0.02,kG:0.69,kcG:3.56},
+  {food:"Kartoffeln",baseAmt:250,unit:"g",pG:0.02,fG:0.001,kG:0.15,kcG:0.73}
 ];
 const FAT_OPT=[
   {food:"Olivenöl",amt:10,unit:"ml",p:0,f:10,k:0,kcal:90},
@@ -116,129 +118,98 @@ let S={
   note:"",
   history:[],
   swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,
-  calAdj:0,
+  carbCut:0,
+  stallCount:0,
   showShop:false
 };
-
 let saveTimer=null;
-function scheduleSave(){
-  if(saveTimer)clearTimeout(saveTimer);
-  saveTimer=setTimeout(()=>dbSet('state',S).catch(()=>{}),300);
-}
+function scheduleSave(){if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(()=>dbSet('state',S).catch(()=>{}),300)}
 
 // ─── HELPERS ────────────────────────────────────────────
-function adjCarb(c,lvl){
-  const red=lvl*10,na=Math.max(0,c.amt-red),f=c.amt>0?na/c.amt:0;
-  return{...c,amt:Math.round(na),kcal:Math.round(c.kcal*f),p:Math.round(c.p*f),f:Math.round(c.f*f),k:Math.round(c.k*f)};
+function getCarb(idx,cut){
+  const c=CARB_BASE[idx],amt=Math.max(0,c.baseAmt-cut);
+  return{food:c.food,amt:Math.round(amt),unit:c.unit,p:Math.round(amt*c.pG),f:Math.round(amt*c.fG),k:Math.round(amt*c.kG),kcal:Math.round(amt*c.kcG)};
 }
-function macroSum(...items){return items.reduce((a,b)=>({kcal:a.kcal+b.kcal,p:a.p+b.p,f:a.f+b.f,k:a.k+b.k}),{kcal:0,p:0,f:0,k:0})}
+function mSum(...ii){return ii.reduce((a,b)=>({kcal:a.kcal+b.kcal,p:a.p+b.p,f:a.f+b.f,k:a.k+b.k}),{kcal:0,p:0,f:0,k:0})}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 // ─── RENDER ─────────────────────────────────────────────
 function render(){
   const pA=PROTEIN_A[S.swapPA],pB=PROTEIN_B[S.swapPB];
-  const cA=adjCarb(CARB_OPT[S.swapCA],S.calAdj),cB=adjCarb(CARB_OPT[S.swapCB],S.calAdj);
+  const cA=getCarb(S.swapCA,S.carbCut),cB=getCarb(S.swapCB,S.carbCut);
   const fA=FAT_OPT[S.swapFA],fB=FAT_OPT[S.swapFB];
-  const m3=macroSum(pA,cA,VEG3,fA),m4=macroSum(pB,cB,VEG4,fB);
-
+  const m3=mSum(pA,cA,VEG3,fA),m4=mSum(pB,cB,VEG4,fB);
   const meals=[
-    {...FIXED[0],ditems:FIXED[0].items.map(i=>({food:i.food,display:`${i.amt}${i.unit}`}))},
-    {...FIXED[1],ditems:FIXED[1].items.map(i=>({food:i.food,display:`${i.amt}${i.unit}`}))},
-    {name:"Deftig I",macros:m3,ditems:[
+    {...FIXED[0],di:FIXED[0].items.map(i=>({food:i.food,display:`${i.amt}${i.unit}`}))},
+    {...FIXED[1],di:FIXED[1].items.map(i=>({food:i.food,display:`${i.amt}${i.unit}`}))},
+    {name:"Deftig I",macros:m3,di:[
       {food:pA.food,display:`${pA.amt}${pA.unit}`,sw:"pA"},
       {food:cA.food,display:`${cA.amt}${cA.unit}`,sw:"cA"},
       {food:VEG3.food,display:`${VEG3.amt}${VEG3.unit}`},
-      {food:fA.food,display:`${fA.amt}${fA.unit}`,sw:"fA"}
-    ]},
-    {name:"Deftig II",macros:m4,ditems:[
+      {food:fA.food,display:`${fA.amt}${fA.unit}`,sw:"fA"}]},
+    {name:"Deftig II",macros:m4,di:[
       {food:pB.food,display:`${pB.amt}${pB.unit}`,sw:"pB"},
       {food:cB.food,display:`${cB.amt}${cB.unit}`,sw:"cB"},
       {food:VEG4.food,display:`${VEG4.amt}${VEG4.unit}`},
-      {food:fB.food,display:`${fB.amt}${fB.unit}`,sw:"fB"}
-    ]}
+      {food:fB.food,display:`${fB.amt}${fB.unit}`,sw:"fB"}]}
   ];
-
   const tot=meals.reduce((a,m)=>({kcal:a.kcal+m.macros.kcal,p:a.p+m.macros.p,f:a.f+m.macros.f,k:a.k+m.macros.k}),{kcal:0,p:0,f:0,k:0});
-
-  const startW=parseFloat(S.weights[0]),endW=parseFloat(S.weights[5]);
-  const delta=(!isNaN(startW)&&!isNaN(endW))?(endW-startW).toFixed(1):null;
+  const sW=parseFloat(S.weights[0]),eW=parseFloat(S.weights[5]);
+  const delta=(!isNaN(sW)&&!isNaN(eW))?(eW-sW).toFixed(1):null;
   const onTrack=delta!==null&&parseFloat(delta)<=-0.5;
   const adh=Math.round(S.checks.flat().filter(Boolean).length/20*100);
+  let nextAct=delta===null?'none':onTrack?'ok':S.stallCount>=1?'cut':'wait';
 
   let h=`
-  <div class="header">
-    <h1>CUT PROTOCOL</h1><span class="iter">#${S.iteration}</span>
-    <div class="meta"><span>88.2kg → 77kg</span><span>22.9% → 12% KFA</span><span>Deadline Aug 2026</span></div>
-  </div>
-
+  <div class="header"><h1>CUT PROTOCOL</h1><span class="iter">#${S.iteration}</span>
+    <div class="meta"><span>88.2kg → 77kg</span><span>22.9% → 12% KFA</span><span>Deadline Aug 2026</span></div></div>
   <div class="totals">
-    <div class="t"><div class="tv" style="color:#fff">${tot.kcal}</div><div class="tl">kcal</div></div>
-    <div class="t"><div class="tv cp">${tot.p}g</div><div class="tl">Protein</div></div>
-    <div class="t"><div class="tv cf">${tot.f}g</div><div class="tl">Fett</div></div>
-    <div class="t"><div class="tv ck">${tot.k}g</div><div class="tl">Carbs</div></div>
+    ${[['kcal',tot.kcal,'#fff'],['Protein',tot.p+'g','#e74c3c'],['Fett',tot.f+'g','#f39c12'],['Carbs',tot.k+'g','#3498db']].map(([l,v,c])=>`<div class="t"><div class="tv" style="color:${c}">${v}</div><div class="tl">${l}</div></div>`).join('')}
   </div>
-
-  <div class="adj">
-    <span class="al">kcal adj:</span>
-    ${[0,1,2,3].map(l=>`<button class="${S.calAdj===l?'active':''}" onclick="setAdj(${l})">${l===0?'BASE':`−${l*100}`}</button>`).join('')}
+  <div class="status-bar">
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      ${S.carbCut===0?'<span class="tag tag-ok">BASE CARBS</span>':`<span class="tag tag-cut">−${S.carbCut}g CARBS</span>`}
+      ${S.stallCount>0?`<span class="tag tag-warn">STALL ${S.stallCount}/2</span>`:''}
+    </div>
+    <span style="font-size:10px;color:#444">${cA.food} ${cA.amt}${cA.unit} · ${cB.food} ${cB.amt}${cB.unit}</span>
   </div>`;
 
-  // Meals
   meals.forEach((meal,i)=>{
     h+=`<div class="meal"><div class="mh"><div class="mn">${i+1}. ${meal.name}</div><div class="mm">${meal.macros.kcal} kcal · <span class="cp">P${meal.macros.p}</span> <span class="cf">F${meal.macros.f}</span> <span class="ck">K${meal.macros.k}</span></div></div>`;
-    meal.ditems.forEach(it=>{
-      h+=`<div class="mi"><span>${esc(it.food)}${it.sw?` <button class="swap-btn" onclick="cycleSwap('${it.sw}')">↻</button>`:''}</span><span class="mv">${esc(it.display)}</span></div>`;
-    });
+    meal.di.forEach(it=>{h+=`<div class="mi"><span>${esc(it.food)}${it.sw?` <button class="swap-btn" onclick="cyc('${it.sw}')">↻</button>`:''}</span><span class="mv">${esc(it.display)}</span></div>`});
     h+=`</div>`;
   });
 
-  // Shopping
   h+=`<button class="full-btn" onclick="toggleShop()">${S.showShop?'Einkaufsliste ausblenden ▴':'Einkaufsliste ×5 ▾'}</button>`;
   if(S.showShop){
     const list={};
     const add=(f,a,u)=>{const k=f+'|'+u;list[k]=list[k]||{food:f,amt:0,unit:u};list[k].amt+=a};
-    for(let i=0;i<5;i++){
-      FIXED[0].items.forEach(x=>add(x.food,x.amt,x.unit));
-      FIXED[1].items.forEach(x=>add(x.food,x.amt,x.unit));
-      add(pA.food,pA.amt,pA.unit);add(cA.food,cA.amt,cA.unit);add(VEG3.food,VEG3.amt,VEG3.unit);add(fA.food,fA.amt,fA.unit);
-      add(pB.food,pB.amt,pB.unit);add(cB.food,cB.amt,cB.unit);add(VEG4.food,VEG4.amt,VEG4.unit);add(fB.food,fB.amt,fB.unit);
-    }
-    const items=Object.values(list).sort((a,b)=>a.food.localeCompare(b.food));
+    for(let i=0;i<5;i++){FIXED[0].items.forEach(x=>add(x.food,x.amt,x.unit));FIXED[1].items.forEach(x=>add(x.food,x.amt,x.unit));add(pA.food,pA.amt,pA.unit);add(cA.food,cA.amt,cA.unit);add(VEG3.food,VEG3.amt,VEG3.unit);add(fA.food,fA.amt,fA.unit);add(pB.food,pB.amt,pB.unit);add(cB.food,cB.amt,cB.unit);add(VEG4.food,VEG4.amt,VEG4.unit);add(fB.food,fB.amt,fB.unit)}
     h+=`<div class="shop"><div class="sl">Einkaufsliste — 1 Iteration (5 Tage)</div>`;
-    items.forEach(it=>{h+=`<div class="si"><span>${esc(it.food)}</span><span class="sv">${it.amt} ${esc(it.unit)}</span></div>`});
+    Object.values(list).sort((a,b)=>a.food.localeCompare(b.food)).forEach(it=>{h+=`<div class="si"><span>${esc(it.food)}</span><span class="sv">${it.amt} ${esc(it.unit)}</span></div>`});
     h+=`</div>`;
   }
 
-  // Tracker
   h+=`<div class="tracker"><div class="th"><h2>5-Tage Tracker</h2><span style="font-size:12px;color:${adh>=80?'#2ecc71':adh>0?'#e74c3c':'#555'}">${adh}%</span></div>`;
   h+=`<div class="wl">Gewicht (morgens, nüchtern)</div><div class="wr">`;
-  ['T0','T1','T2','T3','T4','T5'].forEach((l,i)=>{
-    h+=`<div class="wi"><span>${l}</span><input type="number" step="0.1" placeholder="kg" value="${esc(S.weights[i])}" oninput="setWeight(${i},this.value)"></div>`;
-  });
+  ['T0','T1','T2','T3','T4','T5'].forEach((l,i)=>{h+=`<div class="wi"><span>${l}</span><input type="number" step="0.1" placeholder="kg" value="${esc(S.weights[i])}" oninput="setW(${i},this.value)"></div>`});
   h+=`</div>`;
 
-  // Check grid
   h+=`<div class="grid"><div></div>${['M1','M2','M3','M4'].map(m=>`<div class="gl">${m}</div>`).join('')}`;
-  for(let d=0;d<5;d++){
-    h+=`<div class="gd">T${d+1}</div>`;
-    for(let m=0;m<4;m++){
-      h+=`<button class="gc${S.checks[d][m]?' on':''}" onclick="toggleCheck(${d},${m})">${S.checks[d][m]?'✓':'·'}</button>`;
-    }
-  }
+  for(let d=0;d<5;d++){h+=`<div class="gd">T${d+1}</div>`;for(let m=0;m<4;m++){h+=`<button class="gc${S.checks[d][m]?' on':''}" onclick="tgl(${d},${m})">${S.checks[d][m]?'✓':'·'}</button>`}}
   h+=`</div>`;
 
-  // Eval
   if(delta!==null){
-    h+=`<div class="eval ${onTrack?'ok':'no'}"><div class="ev" style="color:${onTrack?'#2ecc71':'#e74c3c'}">${delta} kg in 5 Tagen</div><div class="ed">${onTrack?'→ Ziel erreicht. Weiter mit gleichen Kalorien.':parseFloat(delta)>0?'→ Gewicht gestiegen. kcal-Level runter oder Adherence prüfen.':'→ Unter 0.5kg. Noch 1 Iteration abwarten, dann kcal senken.'}</div></div>`;
+    if(onTrack) h+=`<div class="eval ok"><div class="ev" style="color:#2ecc71">${delta} kg in 5 Tagen</div><div class="ed">→ On track. Kalorien bleiben. Stall-Counter reset.</div></div>`;
+    else if(nextAct==='cut') h+=`<div class="eval no"><div class="ev" style="color:#e74c3c">${delta} kg — 2. Stall</div><div class="ed">→ Nächste Iteration: −30g Carbs pro Quelle (${S.carbCut}g → ${S.carbCut+30}g unter Base).</div></div>`;
+    else h+=`<div class="eval wait"><div class="ev" style="color:#f39c12">${delta} kg — 1. Stall</div><div class="ed">→ 1 Iteration abwarten. Wenn wieder &lt;0.5kg → automatische Carb-Reduktion.</div></div>`;
   }
 
-  h+=`<textarea placeholder="Notizen..." oninput="setNote(this.value)">${esc(S.note)}</textarea>`;
-  h+=`<button class="full-btn" onclick="nextIter()">Nächste Iteration →</button></div>`;
+  h+=`<textarea placeholder="Notizen..." oninput="setN(this.value)">${esc(S.note)}</textarea>`;
+  h+=`<button class="full-btn" onclick="next()" style="background:#1a1a1a">Nächste Iteration →</button></div>`;
 
-  // History
   if(S.history.length>0){
     h+=`<div class="history"><h2>Verlauf</h2>`;
-    // SVG graph
     const allW=S.history.flatMap(x=>(x.weights||[]).filter(w=>w!=='').map(Number)).filter(n=>!isNaN(n));
     if(allW.length>=2){
       const mn=Math.min(...allW)-.5,mx=Math.max(...allW)+.5,w=680,hh=80;
@@ -248,37 +219,53 @@ function render(){
       h+=`<text x="0" y="${hh+14}" fill="#555" font-size="9" font-family="inherit">${mn.toFixed(1)}</text><text x="${w}" y="${hh+14}" fill="#555" font-size="9" font-family="inherit" text-anchor="end">${mx.toFixed(1)}</text></svg>`;
     }
     [...S.history].reverse().forEach(x=>{
-      h+=`<div class="hi"><span>#${x.iteration} — ${x.date}</span><span><span style="color:${x.delta&&parseFloat(x.delta)<=-0.5?'#2ecc71':'#e74c3c'}">${x.delta??'–'}kg</span> · ${x.adherence}% · ${x.kcal}kcal</span></div>`;
-    });
+      h+=`<div class="hi"><span>#${x.iteration} — ${x.date}${x.action==='cut'?' ✂':''}</span><span><span style="color:${x.delta&&parseFloat(x.delta)<=-0.5?'#2ecc71':'#e74c3c'}">${x.delta??'–'}kg</span> · ${x.adherence}% · ${x.kcal}kcal${x.carbCut>0?` · −${x.carbCut}g`:''}</span></div>`});
     h+=`</div>`;
   }
 
-  h+=`<div class="footer"><div class="fr">≥0.5kg/5d → weiter · &lt;0.5kg → 1× warten · danach kcal ↓</div><button onclick="resetAll()">reset all</button></div>`;
+  h+=`<div style="background:#0d0d0d;border:1px dashed #1a1a1a;padding:12px 18px;margin-top:16px;font-size:10px;color:#333;line-height:1.6">
+    <strong style="color:#444">AUTO-ADJUST</strong><br>
+    ≥0.5kg/5d → weiter, Stall reset<br>
+    &lt;0.5kg (1×) → abwarten<br>
+    &lt;0.5kg (2×) → −30g Carbs/Quelle, Stall reset
+  </div>`;
+  h+=`<div class="footer"><div class="fr">carbCut: ${S.carbCut}g · stalls: ${S.stallCount}/2</div><button onclick="resetAll()">reset all</button></div>`;
 
   document.getElementById('app').innerHTML=h;
 }
 
 // ─── ACTIONS ────────────────────────────────────────────
-function setAdj(n){S.calAdj=n;scheduleSave();render()}
-function cycleSwap(t){
-  const map={pA:['swapPA',PROTEIN_A.length],pB:['swapPB',PROTEIN_B.length],cA:['swapCA',CARB_OPT.length],cB:['swapCB',CARB_OPT.length],fA:['swapFA',FAT_OPT.length],fB:['swapFB',FAT_OPT.length]};
-  const[k,len]=map[t];S[k]=(S[k]+1)%len;scheduleSave();render();
-}
+function cyc(t){const m={pA:['swapPA',PROTEIN_A.length],pB:['swapPB',PROTEIN_B.length],cA:['swapCA',CARB_BASE.length],cB:['swapCB',CARB_BASE.length],fA:['swapFA',FAT_OPT.length],fB:['swapFB',FAT_OPT.length]};const[k,l]=m[t];S[k]=(S[k]+1)%l;scheduleSave();render()}
 function toggleShop(){S.showShop=!S.showShop;render()}
-function setWeight(i,v){S.weights[i]=v;scheduleSave()}
-function setNote(v){S.note=v;scheduleSave()}
-function toggleCheck(d,m){S.checks[d][m]=!S.checks[d][m];scheduleSave();render()}
+function setW(i,v){S.weights[i]=v;scheduleSave()}
+function setN(v){S.note=v;scheduleSave()}
+function tgl(d,m){S.checks[d][m]=!S.checks[d][m];scheduleSave();render()}
 
-function nextIter(){
-  const startW=parseFloat(S.weights[0]),endW=parseFloat(S.weights[5]);
-  const delta=(!isNaN(startW)&&!isNaN(endW))?(endW-startW).toFixed(1):null;
+function next(){
+  const sW=parseFloat(S.weights[0]),eW=parseFloat(S.weights[5]);
+  const delta=(!isNaN(sW)&&!isNaN(eW))?(eW-sW).toFixed(1):null;
   const adh=Math.round(S.checks.flat().filter(Boolean).length/20*100);
-  const tot=[FIXED[0].macros,FIXED[1].macros,
-    macroSum(PROTEIN_A[S.swapPA],adjCarb(CARB_OPT[S.swapCA],S.calAdj),VEG3,FAT_OPT[S.swapFA]),
-    macroSum(PROTEIN_B[S.swapPB],adjCarb(CARB_OPT[S.swapCB],S.calAdj),VEG4,FAT_OPT[S.swapFB])
-  ].reduce((a,m)=>a+m.kcal,0);
+  const cA=getCarb(S.swapCA,S.carbCut),cB=getCarb(S.swapCB,S.carbCut);
+  const kcal=[FIXED[0].macros,FIXED[1].macros,mSum(PROTEIN_A[S.swapPA],cA,VEG3,FAT_OPT[S.swapFA]),mSum(PROTEIN_B[S.swapPB],cB,VEG4,FAT_OPT[S.swapFB])].reduce((a,m)=>a+m.kcal,0);
 
-  S.history.push({iteration:S.iteration,date:new Date().toISOString().slice(0,10),weights:[...S.weights],delta,adherence:adh,calAdj:S.calAdj,kcal:tot});
+  // ─── AUTO-ADJUST ──────────────────────────────────
+  let action='ok';
+  const lost=delta!==null?parseFloat(delta):0;
+  if(delta===null||lost<=-0.5){
+    S.stallCount=0;
+    action='ok';
+  } else {
+    S.stallCount++;
+    if(S.stallCount>=2){
+      S.carbCut+=30;
+      S.stallCount=0;
+      action='cut';
+    } else {
+      action='wait';
+    }
+  }
+
+  S.history.push({iteration:S.iteration,date:new Date().toISOString().slice(0,10),weights:[...S.weights],delta,adherence:adh,kcal,carbCut:S.carbCut,action});
   S.iteration++;
   S.checks=Array.from({length:5},()=>Array(4).fill(false));
   S.weights=Array(6).fill("");
@@ -290,20 +277,15 @@ function nextIter(){
 async function resetAll(){
   if(!confirm('Alle Daten unwiderruflich löschen?'))return;
   try{await dbDel('state')}catch(e){}
-  S={iteration:1,checks:Array.from({length:5},()=>Array(4).fill(false)),weights:Array(6).fill(""),note:"",history:[],swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,calAdj:0,showShop:false};
+  S={iteration:1,checks:Array.from({length:5},()=>Array(4).fill(false)),weights:Array(6).fill(""),note:"",history:[],swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,carbCut:0,stallCount:0,showShop:false};
   render();
 }
 
 // ─── INIT ───────────────────────────────────────────────
 (async()=>{
-  try{
-    const saved=await dbGet('state');
-    if(saved)Object.assign(S,saved);
-  }catch(e){}
+  try{const saved=await dbGet('state');if(saved)Object.assign(S,saved)}catch(e){}
   render();
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/cut-protocol/sw.js').catch(()=>{});
-  }
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('/cut-protocol/sw.js').catch(()=>{});
 })();
 </script>
 </body>
