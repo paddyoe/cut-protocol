@@ -222,7 +222,7 @@ function render(){
   // Tracker
   h+=`<div class="tracker"><div class="th"><h2>5-Tage Tracker</h2><span style="font-size:12px;color:${adh>=80?'#2ecc71':adh>0?'#e74c3c':'#555'}">${adh}%</span></div>`;
   h+=`<div class="wl">Gewicht (morgens, nüchtern)</div><div class="wr">`;
-  ['T0','T1','T2','T3','T4','T5'].forEach((l,i)=>{h+=`<div class="wi"><span>${l}</span><input type="number" step="0.1" placeholder="kg" value="${esc(S.weights[i])}" oninput="setW(${i},this.value)"></div>`});
+  ['T0','T1','T2','T3','T4','T5'].forEach((l,i)=>{h+=`<div class="wi"><span>${l}</span><input type="number" step="0.1" placeholder="kg" value="${esc(S.weights[i])}" oninput="setW(${i},this.value)" onblur="render()"></div>`});
   h+=`</div>`;
 
   // Live daily deltas for current iteration
@@ -360,7 +360,8 @@ function render(){
 // ─── ACTIONS ────────────────────────────────────────────
 function cyc(t){const m={pA:['swapPA',PROTEIN_A.length],pB:['swapPB',PROTEIN_B.length],cA:['swapCA',CARB_BASE.length],cB:['swapCB',CARB_BASE.length],fA:['swapFA',FAT_OPT.length],fB:['swapFB',FAT_OPT.length]};const[k,l]=m[t];S[k]=(S[k]+1)%l;scheduleSave();render()}
 function toggleShop(){S.showShop=!S.showShop;render()}
-function setW(i,v){S.weights[i]=v;scheduleSave();render()}
+let renderTimer=null;
+function setW(i,v){S.weights[i]=v;scheduleSave();if(renderTimer)clearTimeout(renderTimer);renderTimer=setTimeout(()=>{const ae=document.activeElement;if(!ae||ae.tagName!=='INPUT'||ae.type!=='number')render()},800)}
 function setN(v){S.note=v;scheduleSave()}
 function tgl(d,m){S.checks[d][m]=!S.checks[d][m];scheduleSave();render()}
 function toggleHist(iter){S.expandedIter=S.expandedIter===iter?null:iter;render()}
