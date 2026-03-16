@@ -335,7 +335,26 @@ function render(){
   </div>`;
   h+=`<div class="footer"><div class="fr">carbCut: ${S.carbCut}g · stalls: ${S.stallCount}/2</div><button onclick="resetAll()">reset all</button></div>`;
 
+  // Preserve focus before DOM replacement
+  let focusIdx=-1,focusSel=-1,focusIsNote=false;
+  const ae=document.activeElement;
+  if(ae&&ae.tagName==='INPUT'&&ae.type==='number'){
+    const inputs=document.querySelectorAll('.wr input[type="number"]');
+    inputs.forEach((el,i)=>{if(el===ae){focusIdx=i;focusSel=ae.selectionStart}});
+  }
+  if(ae&&ae.tagName==='TEXTAREA'){focusIsNote=true;focusSel=ae.selectionStart}
+
   document.getElementById('app').innerHTML=h;
+
+  // Restore focus after DOM replacement
+  if(focusIdx>=0){
+    const inputs=document.querySelectorAll('.wr input[type="number"]');
+    if(inputs[focusIdx]){inputs[focusIdx].focus();try{inputs[focusIdx].setSelectionRange(focusSel,focusSel)}catch(e){}}
+  }
+  if(focusIsNote){
+    const ta=document.querySelector('textarea');
+    if(ta){ta.focus();try{ta.setSelectionRange(focusSel,focusSel)}catch(e){}}
+  }
 }
 
 // ─── ACTIONS ────────────────────────────────────────────
