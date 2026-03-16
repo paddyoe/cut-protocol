@@ -23,7 +23,7 @@ body{background:#0a0a0a;color:#e0e0e0;font-family:'JetBrains Mono','SF Mono','Fi
 .totals .tv{font-size:22px;font-weight:700}
 .totals .tl{font-size:10px;color:#666;text-transform:uppercase}
 .status-bar{background:#111;border:1px solid #222;padding:10px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.status-bar .tag{font-size:10px;padding:3px 8px;font-weight:700;font-family:inherit;border-radius:2px}
+.tag{font-size:10px;padding:3px 8px;font-weight:700;font-family:inherit;border-radius:2px}
 .tag-ok{background:#0a1f0a;border:1px solid #2ecc71;color:#2ecc71}
 .tag-warn{background:#1f1a0a;border:1px solid #f39c12;color:#f39c12}
 .tag-cut{background:#1f0a0a;border:1px solid #e74c3c;color:#e74c3c}
@@ -64,7 +64,12 @@ textarea{width:100%;background:#111;border:1px solid #222;color:#aaa;padding:8px
 .history{border-top:2px solid #333;padding-top:20px;margin-top:20px}
 .history h2{font-size:14px;font-weight:700;color:#fff;text-transform:uppercase;margin:0 0 12px}
 .hl{font-size:9px;color:#444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.hi{display:flex;justify-content:space-between;font-size:11px;color:#666;padding:4px 0;border-bottom:1px solid #151515}
+.hi{font-size:11px;color:#666;border-bottom:1px solid #151515}
+.hi-head{display:flex;justify-content:space-between;padding:6px 0;cursor:pointer}
+.hi-head:active{opacity:0.7}
+.hi-detail{padding:0 0 8px 0}
+.hi-day{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#555;padding:2px 0 2px 12px;border-left:2px solid #1a1a1a}
+.hi-day .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .footer{display:flex;justify-content:space-between;align-items:center;margin-top:24px;border-top:1px solid #1a1a1a;padding-top:12px}
 .footer .fr{font-size:10px;color:#333}
 .footer button{background:none;border:none;color:#2a2a2a;font-size:10px;font-family:inherit;cursor:pointer;padding:4px 8px}
@@ -92,20 +97,36 @@ const PROTEIN_B=[
   {food:"Forelle",amt:180,unit:"g (roh)",p:36,f:14,k:0,kcal:280},
   {food:"Kabeljau",amt:200,unit:"g (roh)",p:36,f:2,k:0,kcal:165}
 ];
-// Per-gram macros for dynamic carb calculation
 const CARB_BASE=[
-  {food:"Reis",baseAmt:80,unit:"g (roh)",pG:0.07,fG:0.01,kG:0.78,kcG:3.58},
-  {food:"Nudeln",baseAmt:80,unit:"g (roh)",pG:0.11,fG:0.02,kG:0.69,kcG:3.56},
-  {food:"Kartoffeln",baseAmt:250,unit:"g",pG:0.02,fG:0.001,kG:0.15,kcG:0.73}
+  {food:"Reis",baseAmt:60,unit:"g (roh)",pG:0.07,fG:0.01,kG:0.78,kcG:3.58},
+  {food:"Nudeln",baseAmt:60,unit:"g (roh)",pG:0.11,fG:0.02,kG:0.69,kcG:3.56},
+  {food:"Kartoffeln",baseAmt:200,unit:"g",pG:0.02,fG:0.001,kG:0.15,kcG:0.73}
 ];
 const FAT_OPT=[
   {food:"Olivenöl",amt:10,unit:"ml",p:0,f:10,k:0,kcal:90},
   {food:"Kokosöl",amt:10,unit:"ml",p:0,f:10,k:0,kcal:90},
   {food:"Butter",amt:10,unit:"g",p:0,f:8,k:0,kcal:75}
 ];
+
+// Porridge: 50g Haferflocken, 50g Whey, 100g Obst, 15g Lindt 85%, 4g Flohsamenschalen, 200ml Mandelmilch
+// P: 6+40+0.5+1.5+0+0.5=49  F: 3.5+2+0.2+7+0.5+1=14  K: 30+4+12+2.5+3+2.5=54  kcal: 185+195+50+88+8+26=552
 const FIXED=[
-  {name:"Porridge",items:[{food:"Haferflocken",amt:60,unit:"g"},{food:"Mandelmilch",amt:250,unit:"ml"},{food:"Whey Protein",amt:40,unit:"g"},{food:"Banane",amt:1,unit:"Stück"}],macros:{kcal:500,p:48,f:10,k:56}},
-  {name:"Skyr Bowl",items:[{food:"Skyr",amt:400,unit:"g"},{food:"Beeren (TK/frisch)",amt:150,unit:"g"},{food:"Haferflocken",amt:30,unit:"g"}],macros:{kcal:480,p:50,f:4,k:56}}
+  {name:"Porridge",items:[
+    {food:"Haferflocken",amt:50,unit:"g"},
+    {food:"Whey Protein",amt:50,unit:"g"},
+    {food:"Obst",amt:100,unit:"g"},
+    {food:"Lindt 85%",amt:15,unit:"g"},
+    {food:"Flohsamenschalen",amt:4,unit:"g"},
+    {food:"Mandelmilch",amt:200,unit:"ml"}
+  ],macros:{kcal:552,p:49,f:14,k:54}},
+  // Skyr: 400g Skyr, 1 Apfel (~180g), 10g Leinsamen, 10g Paranuss
+  // P: 44+0.5+2+1.4=48  F: 0.8+0.2+4+6.7=12  K: 16+23+1.5+0.4=41  kcal: 260+95+53+66=474
+  {name:"Skyr Bowl",items:[
+    {food:"Skyr",amt:400,unit:"g"},
+    {food:"Apfel",amt:1,unit:"Stück"},
+    {food:"Leinsamen",amt:10,unit:"g"},
+    {food:"Paranuss",amt:10,unit:"g"}
+  ],macros:{kcal:474,p:48,f:12,k:41}}
 ];
 const VEG3={food:"Brokkoli",amt:200,unit:"g",p:6,f:0,k:4,kcal:35};
 const VEG4={food:"Grüne Bohnen",amt:200,unit:"g",p:4,f:0,k:6,kcal:40};
@@ -118,9 +139,9 @@ let S={
   note:"",
   history:[],
   swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,
-  carbCut:0,
-  stallCount:0,
-  showShop:false
+  carbCut:0,stallCount:0,
+  showShop:false,
+  expandedIter:null // which iteration is expanded in history
 };
 let saveTimer=null;
 function scheduleSave(){if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(()=>dbSet('state',S).catch(()=>{}),300)}
@@ -132,6 +153,12 @@ function getCarb(idx,cut){
 }
 function mSum(...ii){return ii.reduce((a,b)=>({kcal:a.kcal+b.kcal,p:a.p+b.p,f:a.f+b.f,k:a.k+b.k}),{kcal:0,p:0,f:0,k:0})}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function dayDelta(w1,w2){
+  const a=parseFloat(w1),b=parseFloat(w2);
+  if(isNaN(a)||isNaN(b))return null;
+  return(b-a).toFixed(1);
+}
 
 // ─── RENDER ─────────────────────────────────────────────
 function render(){
@@ -174,12 +201,14 @@ function render(){
     <span style="font-size:10px;color:#444">${cA.food} ${cA.amt}${cA.unit} · ${cB.food} ${cB.amt}${cB.unit}</span>
   </div>`;
 
+  // Meals
   meals.forEach((meal,i)=>{
     h+=`<div class="meal"><div class="mh"><div class="mn">${i+1}. ${meal.name}</div><div class="mm">${meal.macros.kcal} kcal · <span class="cp">P${meal.macros.p}</span> <span class="cf">F${meal.macros.f}</span> <span class="ck">K${meal.macros.k}</span></div></div>`;
     meal.di.forEach(it=>{h+=`<div class="mi"><span>${esc(it.food)}${it.sw?` <button class="swap-btn" onclick="cyc('${it.sw}')">↻</button>`:''}</span><span class="mv">${esc(it.display)}</span></div>`});
     h+=`</div>`;
   });
 
+  // Shopping
   h+=`<button class="full-btn" onclick="toggleShop()">${S.showShop?'Einkaufsliste ausblenden ▴':'Einkaufsliste ×5 ▾'}</button>`;
   if(S.showShop){
     const list={};
@@ -190,26 +219,48 @@ function render(){
     h+=`</div>`;
   }
 
+  // Tracker
   h+=`<div class="tracker"><div class="th"><h2>5-Tage Tracker</h2><span style="font-size:12px;color:${adh>=80?'#2ecc71':adh>0?'#e74c3c':'#555'}">${adh}%</span></div>`;
   h+=`<div class="wl">Gewicht (morgens, nüchtern)</div><div class="wr">`;
   ['T0','T1','T2','T3','T4','T5'].forEach((l,i)=>{h+=`<div class="wi"><span>${l}</span><input type="number" step="0.1" placeholder="kg" value="${esc(S.weights[i])}" oninput="setW(${i},this.value)"></div>`});
   h+=`</div>`;
 
+  // Live daily deltas for current iteration
+  h+=`<div style="margin-bottom:14px">`;
+  for(let d=0;d<5;d++){
+    const w0=S.weights[d],w1=S.weights[d+1];
+    const dd=dayDelta(w0,w1);
+    const wVal=parseFloat(w1);
+    if(dd!==null){
+      const col=parseFloat(dd)<=0?'#2ecc71':'#e74c3c';
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#555;padding:2px 0 2px 12px;border-left:2px solid ${col}">
+        <span>Tag ${d+1}: ${wVal.toFixed(1)} kg</span>
+        <span style="color:${col};font-weight:700">${parseFloat(dd)>0?'+':''}${dd} kg</span>
+      </div>`;
+    }
+  }
+  h+=`</div>`;
+
+  // Check grid
   h+=`<div class="grid"><div></div>${['M1','M2','M3','M4'].map(m=>`<div class="gl">${m}</div>`).join('')}`;
   for(let d=0;d<5;d++){h+=`<div class="gd">T${d+1}</div>`;for(let m=0;m<4;m++){h+=`<button class="gc${S.checks[d][m]?' on':''}" onclick="tgl(${d},${m})">${S.checks[d][m]?'✓':'·'}</button>`}}
   h+=`</div>`;
 
+  // Eval
   if(delta!==null){
     if(onTrack) h+=`<div class="eval ok"><div class="ev" style="color:#2ecc71">${delta} kg in 5 Tagen</div><div class="ed">→ On track. Kalorien bleiben. Stall-Counter reset.</div></div>`;
-    else if(nextAct==='cut') h+=`<div class="eval no"><div class="ev" style="color:#e74c3c">${delta} kg — 2. Stall</div><div class="ed">→ Nächste Iteration: −30g Carbs pro Quelle (${S.carbCut}g → ${S.carbCut+30}g unter Base).</div></div>`;
+    else if(nextAct==='cut') h+=`<div class="eval no"><div class="ev" style="color:#e74c3c">${delta} kg — 2. Stall</div><div class="ed">→ Nächste Iteration: −30g Carbs/Quelle (${S.carbCut}g → ${S.carbCut+30}g unter Base).</div></div>`;
     else h+=`<div class="eval wait"><div class="ev" style="color:#f39c12">${delta} kg — 1. Stall</div><div class="ed">→ 1 Iteration abwarten. Wenn wieder &lt;0.5kg → automatische Carb-Reduktion.</div></div>`;
   }
 
   h+=`<textarea placeholder="Notizen..." oninput="setN(this.value)">${esc(S.note)}</textarea>`;
   h+=`<button class="full-btn" onclick="next()" style="background:#1a1a1a">Nächste Iteration →</button></div>`;
 
+  // ─── HISTORY ──────────────────────────────────────────
   if(S.history.length>0){
     h+=`<div class="history"><h2>Verlauf</h2>`;
+
+    // SVG weight graph
     const allW=S.history.flatMap(x=>(x.weights||[]).filter(w=>w!=='').map(Number)).filter(n=>!isNaN(n));
     if(allW.length>=2){
       const mn=Math.min(...allW)-.5,mx=Math.max(...allW)+.5,w=680,hh=80;
@@ -218,8 +269,61 @@ function render(){
       allW.forEach((v,i)=>{h+=`<circle cx="${(i/(allW.length-1))*w}" cy="${hh-((v-mn)/(mx-mn))*hh}" r="3" fill="#e74c3c"/>`});
       h+=`<text x="0" y="${hh+14}" fill="#555" font-size="9" font-family="inherit">${mn.toFixed(1)}</text><text x="${w}" y="${hh+14}" fill="#555" font-size="9" font-family="inherit" text-anchor="end">${mx.toFixed(1)}</text></svg>`;
     }
+
+    // Expandable iteration rows
     [...S.history].reverse().forEach(x=>{
-      h+=`<div class="hi"><span>#${x.iteration} — ${x.date}${x.action==='cut'?' ✂':''}</span><span><span style="color:${x.delta&&parseFloat(x.delta)<=-0.5?'#2ecc71':'#e74c3c'}">${x.delta??'–'}kg</span> · ${x.adherence}% · ${x.kcal}kcal${x.carbCut>0?` · −${x.carbCut}g`:''}</span></div>`});
+      const isExp=S.expandedIter===x.iteration;
+      const goalMet=x.delta!==null&&parseFloat(x.delta)<=-0.5;
+      const goalCol=goalMet?'#2ecc71':'#e74c3c';
+
+      h+=`<div class="hi">`;
+      h+=`<div class="hi-head" onclick="toggleHist(${x.iteration})">
+        <span>#${x.iteration} — ${x.date}${x.action==='cut'?' ✂':''}</span>
+        <span>
+          <span style="color:${goalCol}">${x.delta??'–'}kg</span>
+          ${goalMet?'<span style="color:#2ecc71;font-size:9px"> ✓</span>':'<span style="color:#e74c3c;font-size:9px"> ✗</span>'}
+           · ${x.adherence}% · ${x.kcal}kcal${x.carbCut>0?` · −${x.carbCut}g`:''}
+          <span style="color:#333;margin-left:4px">${isExp?'▴':'▾'}</span>
+        </span>
+      </div>`;
+
+      if(isExp){
+        h+=`<div class="hi-detail">`;
+        const ws=x.weights||[];
+        // Show each day's weight and daily delta
+        for(let d=0;d<5;d++){
+          const wStart=ws[d],wEnd=ws[d+1];
+          const dd=dayDelta(wStart,wEnd);
+          const wVal=parseFloat(wEnd);
+          if(!isNaN(wVal)){
+            const col=dd!==null?(parseFloat(dd)<=0?'#2ecc71':'#e74c3c'):'#333';
+            h+=`<div class="hi-day">
+              <span style="display:flex;align-items:center;gap:6px">
+                <span class="dot" style="background:${col}"></span>
+                Tag ${d+1}: <span style="color:#aaa">${wVal.toFixed(1)} kg</span>
+              </span>
+              <span style="color:${col};font-weight:700">${dd!==null?((parseFloat(dd)>0?'+':'')+dd+' kg'):'–'}</span>
+            </div>`;
+          } else if(wEnd!==''){
+            h+=`<div class="hi-day"><span>Tag ${d+1}: –</span><span>–</span></div>`;
+          }
+        }
+        // Total
+        const totalStart=parseFloat(ws[0]),totalEnd=parseFloat(ws[5]);
+        if(!isNaN(totalStart)&&!isNaN(totalEnd)){
+          const td=(totalEnd-totalStart).toFixed(1);
+          const tc=parseFloat(td)<=-0.5?'#2ecc71':'#e74c3c';
+          h+=`<div style="display:flex;justify-content:space-between;font-size:10px;padding:6px 0 2px 12px;border-left:2px solid ${tc};margin-top:4px;color:#888">
+            <span style="font-weight:700">Gesamt: ${totalStart.toFixed(1)} → ${totalEnd.toFixed(1)} kg</span>
+            <span style="color:${tc};font-weight:700">${parseFloat(td)>0?'+':''}${td} kg ${parseFloat(td)<=-0.5?'✓':'✗'}</span>
+          </div>`;
+        }
+        // Note
+        if(x.note){h+=`<div style="font-size:10px;color:#444;padding:4px 0 0 12px;font-style:italic">${esc(x.note)}</div>`}
+        h+=`</div>`;
+      }
+      h+=`</div>`;
+    });
     h+=`</div>`;
   }
 
@@ -237,9 +341,10 @@ function render(){
 // ─── ACTIONS ────────────────────────────────────────────
 function cyc(t){const m={pA:['swapPA',PROTEIN_A.length],pB:['swapPB',PROTEIN_B.length],cA:['swapCA',CARB_BASE.length],cB:['swapCB',CARB_BASE.length],fA:['swapFA',FAT_OPT.length],fB:['swapFB',FAT_OPT.length]};const[k,l]=m[t];S[k]=(S[k]+1)%l;scheduleSave();render()}
 function toggleShop(){S.showShop=!S.showShop;render()}
-function setW(i,v){S.weights[i]=v;scheduleSave()}
+function setW(i,v){S.weights[i]=v;scheduleSave();render()}
 function setN(v){S.note=v;scheduleSave()}
 function tgl(d,m){S.checks[d][m]=!S.checks[d][m];scheduleSave();render()}
+function toggleHist(iter){S.expandedIter=S.expandedIter===iter?null:iter;render()}
 
 function next(){
   const sW=parseFloat(S.weights[0]),eW=parseFloat(S.weights[5]);
@@ -248,28 +353,22 @@ function next(){
   const cA=getCarb(S.swapCA,S.carbCut),cB=getCarb(S.swapCB,S.carbCut);
   const kcal=[FIXED[0].macros,FIXED[1].macros,mSum(PROTEIN_A[S.swapPA],cA,VEG3,FAT_OPT[S.swapFA]),mSum(PROTEIN_B[S.swapPB],cB,VEG4,FAT_OPT[S.swapFB])].reduce((a,m)=>a+m.kcal,0);
 
-  // ─── AUTO-ADJUST ──────────────────────────────────
   let action='ok';
   const lost=delta!==null?parseFloat(delta):0;
   if(delta===null||lost<=-0.5){
-    S.stallCount=0;
-    action='ok';
+    S.stallCount=0;action='ok';
   } else {
     S.stallCount++;
-    if(S.stallCount>=2){
-      S.carbCut+=30;
-      S.stallCount=0;
-      action='cut';
-    } else {
-      action='wait';
-    }
+    if(S.stallCount>=2){S.carbCut+=30;S.stallCount=0;action='cut'}
+    else{action='wait'}
   }
 
-  S.history.push({iteration:S.iteration,date:new Date().toISOString().slice(0,10),weights:[...S.weights],delta,adherence:adh,kcal,carbCut:S.carbCut,action});
+  S.history.push({iteration:S.iteration,date:new Date().toISOString().slice(0,10),weights:[...S.weights],delta,adherence:adh,note:S.note,kcal,carbCut:S.carbCut,action});
   S.iteration++;
   S.checks=Array.from({length:5},()=>Array(4).fill(false));
   S.weights=Array(6).fill("");
   S.note="";
+  S.expandedIter=null;
   scheduleSave();render();
   window.scrollTo(0,0);
 }
@@ -277,7 +376,7 @@ function next(){
 async function resetAll(){
   if(!confirm('Alle Daten unwiderruflich löschen?'))return;
   try{await dbDel('state')}catch(e){}
-  S={iteration:1,checks:Array.from({length:5},()=>Array(4).fill(false)),weights:Array(6).fill(""),note:"",history:[],swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,carbCut:0,stallCount:0,showShop:false};
+  S={iteration:1,checks:Array.from({length:5},()=>Array(4).fill(false)),weights:Array(6).fill(""),note:"",history:[],swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,carbCut:0,stallCount:0,showShop:false,expandedIter:null};
   render();
 }
 
