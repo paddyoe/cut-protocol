@@ -27,6 +27,7 @@ body{background:#0a0a0a;color:#e0e0e0;font-family:'JetBrains Mono','SF Mono','Fi
 .tag-ok{background:#0a1f0a;border:1px solid #2ecc71;color:#2ecc71}
 .tag-warn{background:#1f1a0a;border:1px solid #f39c12;color:#f39c12}
 .tag-cut{background:#1f0a0a;border:1px solid #e74c3c;color:#e74c3c}
+.tag-refeed{background:#0a1a1f;border:1px solid #3498db;color:#3498db}
 .meal{background:#111;border:1px solid #222;margin-bottom:10px;padding:14px 18px}
 .meal .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .meal .mn{font-size:14px;font-weight:700;color:#fff}
@@ -44,7 +45,7 @@ body{background:#0a0a0a;color:#e0e0e0;font-family:'JetBrains Mono','SF Mono','Fi
 .tracker{border-top:2px solid #333;padding-top:20px;margin-top:12px}
 .tracker h2{font-size:14px;font-weight:700;color:#fff;text-transform:uppercase;margin:0}
 .tracker .th{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
-.wl{font-size:9px;color:#444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.lbl{font-size:9px;color:#444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .wr{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
 .wr .wi{display:flex;flex-direction:column;align-items:center}
 .wr .wi span{font-size:9px;color:#444;margin-bottom:2px}
@@ -61,13 +62,23 @@ body{background:#0a0a0a;color:#e0e0e0;font-family:'JetBrains Mono','SF Mono','Fi
 .eval .ev{font-size:13px;font-weight:700}
 .eval .ed{font-size:11px;color:#888;margin-top:4px}
 textarea{width:100%;background:#111;border:1px solid #222;color:#aaa;padding:8px;font-size:12px;font-family:inherit;min-height:36px;resize:vertical;outline:none;box-sizing:border-box;margin-top:4px}
+.nlp-box{background:#111;border:1px solid #222;padding:10px 14px;margin-bottom:14px}
+.nlp-box input{width:100%;background:#141414;border:1px solid #2a2a2a;color:#fff;padding:8px;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box}
+.nlp-hint{font-size:9px;color:#333;margin-top:4px}
+.proj{background:#111;border:1px solid #222;padding:14px 18px;margin-bottom:14px}
+.proj .pv{font-size:16px;font-weight:700}
+.proj .pd{font-size:10px;color:#555;margin-top:4px}
+.refeed-banner{background:#0a1a1f;border:1px solid #3498db;padding:14px 18px;margin-bottom:14px}
+.refeed-banner .rv{font-size:13px;font-weight:700;color:#3498db}
+.refeed-banner .rd{font-size:11px;color:#888;margin-top:4px}
+.corr{background:#0d0d0d;border:1px solid #1a1a1a;padding:12px 18px;margin-bottom:14px}
+.corr .cv{font-size:11px;color:#666;line-height:1.6}
 .history{border-top:2px solid #333;padding-top:20px;margin-top:20px}
 .history h2{font-size:14px;font-weight:700;color:#fff;text-transform:uppercase;margin:0 0 12px}
 .hl{font-size:9px;color:#444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .hi{font-size:11px;color:#666;border-bottom:1px solid #151515}
 .hi-head{display:flex;justify-content:space-between;padding:6px 0;cursor:pointer}
 .hi-head:active{opacity:0.7}
-.hi-detail{padding:0 0 8px 0}
 .hi-day{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#555;padding:2px 0 2px 12px;border-left:2px solid #1a1a1a}
 .hi-day .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .footer{display:flex;justify-content:space-between;align-items:center;margin-top:24px;border-top:1px solid #1a1a1a;padding-top:12px}
@@ -81,10 +92,14 @@ textarea{width:100%;background:#111;border:1px solid #222;color:#aaa;padding:8px
 <script>
 // ─── IndexedDB ──────────────────────────────────────────
 const DB_NAME='CutProtocolDB',DB_VER=1;
-function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);r.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains('kv'))db.createObjectStore('kv')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
-async function dbGet(k){const db=await openDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readonly').objectStore('kv').get(k);t.onsuccess=()=>res(t.result??null);t.onerror=()=>rej(t.error)})}
-async function dbSet(k,v){const db=await openDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite').objectStore('kv').put(v,k);t.onsuccess=()=>res();t.onerror=()=>rej(t.error)})}
-async function dbDel(k){const db=await openDB();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite').objectStore('kv').delete(k);t.onsuccess=()=>res();t.onerror=()=>rej(t.error)})}
+function openDB(){return new Promise((r,j)=>{const q=indexedDB.open(DB_NAME,DB_VER);q.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains('kv'))db.createObjectStore('kv')};q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)})}
+async function dbGet(k){const db=await openDB();return new Promise((r,j)=>{const t=db.transaction('kv','readonly').objectStore('kv').get(k);t.onsuccess=()=>r(t.result??null);t.onerror=()=>j(t.error)})}
+async function dbSet(k,v){const db=await openDB();return new Promise((r,j)=>{const t=db.transaction('kv','readwrite').objectStore('kv').put(v,k);t.onsuccess=()=>r();t.onerror=()=>j(t.error)})}
+async function dbDel(k){const db=await openDB();return new Promise((r,j)=>{const t=db.transaction('kv','readwrite').objectStore('kv').delete(k);t.onsuccess=()=>r();t.onerror=()=>j(t.error)})}
+
+// ─── CONFIG ─────────────────────────────────────────────
+const START_KG=88.2,GOAL_KG=77,START_KFA=22.9,GOAL_KFA=12;
+const DEADLINE=new Date('2026-08-04');
 
 // ─── FOOD DATA ──────────────────────────────────────────
 const PROTEIN_A=[
@@ -107,9 +122,6 @@ const FAT_OPT=[
   {food:"Kokosöl",amt:10,unit:"ml",p:0,f:10,k:0,kcal:90},
   {food:"Butter",amt:10,unit:"g",p:0,f:8,k:0,kcal:75}
 ];
-
-// Porridge: 50g Haferflocken, 50g Whey, 100g Obst, 15g Lindt 85%, 4g Flohsamenschalen, 200ml Mandelmilch
-// P: 6+40+0.5+1.5+0+0.5=49  F: 3.5+2+0.2+7+0.5+1=14  K: 30+4+12+2.5+3+2.5=54  kcal: 185+195+50+88+8+26=552
 const FIXED=[
   {name:"Porridge",items:[
     {food:"Haferflocken",amt:50,unit:"g"},
@@ -119,8 +131,6 @@ const FIXED=[
     {food:"Flohsamenschalen",amt:4,unit:"g"},
     {food:"Mandelmilch",amt:200,unit:"ml"}
   ],macros:{kcal:552,p:49,f:14,k:54}},
-  // Skyr: 400g Skyr, 1 Apfel (~180g), 10g Leinsamen, 10g Paranuss
-  // P: 44+0.5+2+1.4=48  F: 0.8+0.2+4+6.7=12  K: 16+23+1.5+0.4=41  kcal: 260+95+53+66=474
   {name:"Skyr Bowl",items:[
     {food:"Skyr",amt:400,unit:"g"},
     {food:"Apfel",amt:1,unit:"Stück"},
@@ -136,12 +146,14 @@ let S={
   iteration:1,
   checks:Array.from({length:5},()=>Array(4).fill(false)),
   weights:Array(6).fill(""),
+  recovery:Array(5).fill(""), // Whoop recovery 0-100 per day
   note:"",
   history:[],
   swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,
   carbCut:0,stallCount:0,
+  consecutiveOk:0, // for refeed trigger
   showShop:false,
-  expandedIter:null // which iteration is expanded in history
+  expandedIter:null
 };
 let saveTimer=null;
 function scheduleSave(){if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(()=>dbSet('state',S).catch(()=>{}),300)}
@@ -153,11 +165,98 @@ function getCarb(idx,cut){
 }
 function mSum(...ii){return ii.reduce((a,b)=>({kcal:a.kcal+b.kcal,p:a.p+b.p,f:a.f+b.f,k:a.k+b.k}),{kcal:0,p:0,f:0,k:0})}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function dayDelta(a,b){const x=parseFloat(a),y=parseFloat(b);return(!isNaN(x)&&!isNaN(y))?(y-x).toFixed(1):null}
 
-function dayDelta(w1,w2){
-  const a=parseFloat(w1),b=parseFloat(w2);
-  if(isNaN(a)||isNaN(b))return null;
-  return(b-a).toFixed(1);
+// ─── PROJECTION ─────────────────────────────────────────
+function getProjection(){
+  // Collect all weight data points with time index
+  const pts=[];
+  let dayIdx=0;
+  S.history.forEach(h=>{
+    (h.weights||[]).forEach(w=>{
+      const v=parseFloat(w);
+      if(!isNaN(v))pts.push({x:dayIdx,y:v});
+      dayIdx++;
+    });
+  });
+  // Add current iteration weights
+  S.weights.forEach(w=>{
+    const v=parseFloat(w);
+    if(!isNaN(v))pts.push({x:dayIdx,y:v});
+    dayIdx++;
+  });
+  if(pts.length<3)return null;
+
+  // Linear regression
+  const n=pts.length;
+  const sx=pts.reduce((a,p)=>a+p.x,0);
+  const sy=pts.reduce((a,p)=>a+p.y,0);
+  const sxy=pts.reduce((a,p)=>a+p.x*p.y,0);
+  const sxx=pts.reduce((a,p)=>a+p.x*p.x,0);
+  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
+  const intercept=(sy-slope*sx)/n;
+
+  if(slope>=0)return{msg:"Kein Abwärtstrend erkennbar.",date:null,daysLeft:null,onTime:null,rate:0};
+
+  const lastPt=pts[pts.length-1];
+  const currentW=lastPt.y;
+  const daysToGoal=(GOAL_KG-intercept)/slope-lastPt.x;
+  const today=new Date();
+  const projDate=new Date(today.getTime()+daysToGoal*86400000);
+  const deadlineDays=Math.ceil((DEADLINE-today)/86400000);
+  const weeklyRate=slope*7;
+
+  return{
+    date:projDate,
+    daysLeft:Math.round(daysToGoal),
+    onTime:projDate<=DEADLINE,
+    rate:weeklyRate,
+    currentW,
+    deadlineDays
+  };
+}
+
+// ─── WHOOP CORRELATION ──────────────────────────────────
+function getRecoveryCorrelation(){
+  // Need at least 3 iterations with recovery data
+  const valid=S.history.filter(h=>h.recovery&&h.recovery.some(r=>r!==''&&r!==null));
+  if(valid.length<3)return null;
+
+  const data=valid.map(h=>{
+    const recs=h.recovery.map(Number).filter(n=>!isNaN(n));
+    const avgRec=recs.length>0?recs.reduce((a,b)=>a+b,0)/recs.length:null;
+    const delta=h.delta!==null?parseFloat(h.delta):null;
+    return{avgRec,delta};
+  }).filter(d=>d.avgRec!==null&&d.delta!==null);
+
+  if(data.length<3)return null;
+
+  // Split into low (<50) and high (>=50) recovery
+  const low=data.filter(d=>d.avgRec<50);
+  const high=data.filter(d=>d.avgRec>=50);
+  const avgLoss=d=>d.length?d.reduce((a,x)=>a+x.delta,0)/d.length:0;
+
+  const lowAvg=avgLoss(low);
+  const highAvg=avgLoss(high);
+  const avgRecAll=data.reduce((a,d)=>a+d.avgRec,0)/data.length;
+
+  // Find stalls that correlate with low recovery
+  const stallsWithLowRec=data.filter(d=>d.delta>-0.5&&d.avgRec<50).length;
+  const totalStalls=data.filter(d=>d.delta>-0.5).length;
+
+  return{lowAvg,highAvg,avgRecAll,stallsWithLowRec,totalStalls,lowCount:low.length,highCount:high.length};
+}
+
+// ─── REFEED LOGIC ───────────────────────────────────────
+function shouldRefeed(){
+  // Suggest refeed after 4+ consecutive successful iterations
+  // OR if adherence dropped below 60% for last 2 iterations
+  if(S.consecutiveOk>=4)return{reason:'streak',msg:`${S.consecutiveOk} Iterationen in Folge im Defizit. Strategischer Refeed empfohlen — 1 Tag Carbs hoch (Base +100g), Fett runter, Kalorien auf Maintenance (~2600 kcal). Verhindert metabolische Adaption.`};
+
+  const last2=S.history.slice(-2);
+  if(last2.length===2&&last2.every(h=>h.adherence<60))return{reason:'adherence',msg:'Adherence unter 60% in den letzten 2 Iterationen. Refeed-Tag kann helfen: psychologischer Reset, Leptin-Boost. 1 Tag Maintenance, dann weiter.'};
+
+  return null;
 }
 
 // ─── RENDER ─────────────────────────────────────────────
@@ -189,26 +288,53 @@ function render(){
 
   let h=`
   <div class="header"><h1>CUT PROTOCOL</h1><span class="iter">#${S.iteration}</span>
-    <div class="meta"><span>88.2kg → 77kg</span><span>22.9% → 12% KFA</span><span>Deadline Aug 2026</span></div></div>
+    <div class="meta"><span>${START_KG}kg → ${GOAL_KG}kg</span><span>${START_KFA}% → ${GOAL_KFA}% KFA</span><span>Deadline 04.08.2026</span></div></div>
+
   <div class="totals">
     ${[['kcal',tot.kcal,'#fff'],['Protein',tot.p+'g','#e74c3c'],['Fett',tot.f+'g','#f39c12'],['Carbs',tot.k+'g','#3498db']].map(([l,v,c])=>`<div class="t"><div class="tv" style="color:${c}">${v}</div><div class="tl">${l}</div></div>`).join('')}
   </div>
+
   <div class="status-bar">
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       ${S.carbCut===0?'<span class="tag tag-ok">BASE CARBS</span>':`<span class="tag tag-cut">−${S.carbCut}g CARBS</span>`}
       ${S.stallCount>0?`<span class="tag tag-warn">STALL ${S.stallCount}/2</span>`:''}
+      ${S.consecutiveOk>=3?`<span class="tag tag-ok">🔥 ${S.consecutiveOk} STREAK</span>`:''}
     </div>
     <span style="font-size:10px;color:#444">${cA.food} ${cA.amt}${cA.unit} · ${cB.food} ${cB.amt}${cB.unit}</span>
   </div>`;
 
-  // Meals
+  // ─── PROJECTION ──────────────────────────────────────
+  const proj=getProjection();
+  if(proj){
+    if(proj.date){
+      const dateStr=proj.date.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+      const col=proj.onTime?'#2ecc71':'#e74c3c';
+      h+=`<div class="proj">
+        <div class="pv" style="color:${col}">${GOAL_KG}kg am ${dateStr}</div>
+        <div class="pd">${proj.onTime?'✓ Vor Deadline':'✗ Nach Deadline'} · ${Math.abs(proj.daysLeft)} Tage · ${proj.rate.toFixed(2)} kg/Woche · aktuell ${proj.currentW.toFixed(1)}kg</div>
+      </div>`;
+    } else {
+      h+=`<div class="proj"><div class="pv" style="color:#f39c12">${proj.msg}</div></div>`;
+    }
+  }
+
+  // ─── REFEED BANNER ───────────────────────────────────
+  const refeed=shouldRefeed();
+  if(refeed){
+    h+=`<div class="refeed-banner">
+      <div class="rv">⚡ REFEED EMPFEHLUNG</div>
+      <div class="rd">${refeed.msg}</div>
+    </div>`;
+  }
+
+  // ─── MEALS ───────────────────────────────────────────
   meals.forEach((meal,i)=>{
     h+=`<div class="meal"><div class="mh"><div class="mn">${i+1}. ${meal.name}</div><div class="mm">${meal.macros.kcal} kcal · <span class="cp">P${meal.macros.p}</span> <span class="cf">F${meal.macros.f}</span> <span class="ck">K${meal.macros.k}</span></div></div>`;
     meal.di.forEach(it=>{h+=`<div class="mi"><span>${esc(it.food)}${it.sw?` <button class="swap-btn" onclick="cyc('${it.sw}')">↻</button>`:''}</span><span class="mv">${esc(it.display)}</span></div>`});
     h+=`</div>`;
   });
 
-  // Shopping
+  // ─── SHOPPING ────────────────────────────────────────
   h+=`<button class="full-btn" onclick="toggleShop()">${S.showShop?'Einkaufsliste ausblenden ▴':'Einkaufsliste ×5 ▾'}</button>`;
   if(S.showShop){
     const list={};
@@ -219,22 +345,39 @@ function render(){
     h+=`</div>`;
   }
 
-  // Tracker
+  // ─── TRACKER ─────────────────────────────────────────
   h+=`<div class="tracker"><div class="th"><h2>5-Tage Tracker</h2><span style="font-size:12px;color:${adh>=80?'#2ecc71':adh>0?'#e74c3c':'#555'}">${adh}%</span></div>`;
-  h+=`<div class="wl">Gewicht (morgens, nüchtern)</div><div class="wr">`;
+
+  // NLP Quick Input
+  h+=`<div class="nlp-box">
+    <div class="lbl" style="margin-bottom:4px">Quick Input</div>
+    <input type="text" id="nlp-input" placeholder="z.B. 87.4 87.1 86.9 87.0 86.6 86.3" onkeydown="if(event.key==='Enter')parseNLP()">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="nlp-hint">6 Werte mit Leerzeichen → T0-T5</div>
+      <button onclick="parseNLP()" style="background:none;border:1px solid #333;color:#666;font-size:10px;font-family:inherit;padding:2px 8px;cursor:pointer;margin-top:4px">Parse ↵</button>
+    </div>
+  </div>`;
+
+  // Weight inputs
+  h+=`<div class="lbl">Gewicht (morgens, nüchtern)</div><div class="wr">`;
   ['T0','T1','T2','T3','T4','T5'].forEach((l,i)=>{h+=`<div class="wi"><span>${l}</span><input type="number" step="0.1" placeholder="kg" value="${esc(S.weights[i])}" oninput="setW(${i},this.value)" onblur="render()"></div>`});
   h+=`</div>`;
 
-  // Live daily deltas for current iteration
+  // Whoop Recovery inputs
+  h+=`<div class="lbl">Whoop Recovery %</div><div class="wr">`;
+  ['T1','T2','T3','T4','T5'].forEach((l,i)=>{h+=`<div class="wi"><span>${l}</span><input type="number" step="1" min="0" max="100" placeholder="%" value="${esc(S.recovery[i])}" oninput="setR(${i},this.value)" onblur="render()" style="width:46px;${S.recovery[i]!==''?'border-color:'+(parseInt(S.recovery[i])>=50?'#27ae60':'#c0392b'):''}"></div>`});
+  h+=`</div>`;
+
+  // Live daily deltas
   h+=`<div style="margin-bottom:14px">`;
   for(let d=0;d<5;d++){
-    const w0=S.weights[d],w1=S.weights[d+1];
-    const dd=dayDelta(w0,w1);
-    const wVal=parseFloat(w1);
+    const dd=dayDelta(S.weights[d],S.weights[d+1]);
+    const wVal=parseFloat(S.weights[d+1]);
+    const rec=S.recovery[d]!==''?parseInt(S.recovery[d]):null;
     if(dd!==null){
       const col=parseFloat(dd)<=0?'#2ecc71':'#e74c3c';
       h+=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#555;padding:2px 0 2px 12px;border-left:2px solid ${col}">
-        <span>Tag ${d+1}: ${wVal.toFixed(1)} kg</span>
+        <span>Tag ${d+1}: ${wVal.toFixed(1)} kg${rec!==null?` · <span style="color:${rec>=50?'#2ecc71':'#e74c3c'}">${rec}%</span>`:''}</span>
         <span style="color:${col};font-weight:700">${parseFloat(dd)>0?'+':''}${dd} kg</span>
       </div>`;
     }
@@ -256,11 +399,24 @@ function render(){
   h+=`<textarea placeholder="Notizen..." oninput="setN(this.value)">${esc(S.note)}</textarea>`;
   h+=`<button class="full-btn" onclick="next()" style="background:#1a1a1a">Nächste Iteration →</button></div>`;
 
-  // ─── HISTORY ──────────────────────────────────────────
+  // ─── RECOVERY CORRELATION ────────────────────────────
+  const corr=getRecoveryCorrelation();
+  if(corr){
+    h+=`<div class="corr"><div class="lbl" style="margin-bottom:6px">Whoop × Gewicht Korrelation</div><div class="cv">`;
+    h+=`Ø Recovery: <span style="color:#aaa">${corr.avgRecAll.toFixed(0)}%</span><br>`;
+    if(corr.lowCount>0&&corr.highCount>0){
+      h+=`Recovery &lt;50%: <span style="color:#e74c3c">${corr.lowAvg.toFixed(2)} kg/Iter</span> (n=${corr.lowCount})<br>`;
+      h+=`Recovery ≥50%: <span style="color:#2ecc71">${corr.highAvg.toFixed(2)} kg/Iter</span> (n=${corr.highCount})<br>`;
+    }
+    if(corr.totalStalls>0){
+      h+=`Stalls mit niedriger Recovery: <span style="color:#f39c12">${corr.stallsWithLowRec}/${corr.totalStalls}</span>`;
+    }
+    h+=`</div></div>`;
+  }
+
+  // ─── HISTORY ─────────────────────────────────────────
   if(S.history.length>0){
     h+=`<div class="history"><h2>Verlauf</h2>`;
-
-    // SVG weight graph
     const allW=S.history.flatMap(x=>(x.weights||[]).filter(w=>w!=='').map(Number)).filter(n=>!isNaN(n));
     if(allW.length>=2){
       const mn=Math.min(...allW)-.5,mx=Math.max(...allW)+.5,w=680,hh=80;
@@ -270,55 +426,52 @@ function render(){
       h+=`<text x="0" y="${hh+14}" fill="#555" font-size="9" font-family="inherit">${mn.toFixed(1)}</text><text x="${w}" y="${hh+14}" fill="#555" font-size="9" font-family="inherit" text-anchor="end">${mx.toFixed(1)}</text></svg>`;
     }
 
-    // Expandable iteration rows
     [...S.history].reverse().forEach(x=>{
       const isExp=S.expandedIter===x.iteration;
       const goalMet=x.delta!==null&&parseFloat(x.delta)<=-0.5;
       const goalCol=goalMet?'#2ecc71':'#e74c3c';
+      const avgRec=x.recovery?(()=>{const r=x.recovery.map(Number).filter(n=>!isNaN(n));return r.length?Math.round(r.reduce((a,b)=>a+b,0)/r.length):null})():null;
 
-      h+=`<div class="hi">`;
-      h+=`<div class="hi-head" onclick="toggleHist(${x.iteration})">
+      h+=`<div class="hi"><div class="hi-head" onclick="toggleHist(${x.iteration})">
         <span>#${x.iteration} — ${x.date}${x.action==='cut'?' ✂':''}</span>
         <span>
           <span style="color:${goalCol}">${x.delta??'–'}kg</span>
           ${goalMet?'<span style="color:#2ecc71;font-size:9px"> ✓</span>':'<span style="color:#e74c3c;font-size:9px"> ✗</span>'}
+          ${avgRec!==null?` · <span style="color:${avgRec>=50?'#2ecc71':'#e74c3c'}">${avgRec}%R</span>`:''}
            · ${x.adherence}% · ${x.kcal}kcal${x.carbCut>0?` · −${x.carbCut}g`:''}
           <span style="color:#333;margin-left:4px">${isExp?'▴':'▾'}</span>
         </span>
       </div>`;
 
       if(isExp){
-        h+=`<div class="hi-detail">`;
+        h+=`<div style="padding:0 0 8px 0">`;
         const ws=x.weights||[];
-        // Show each day's weight and daily delta
+        const recs=x.recovery||[];
         for(let d=0;d<5;d++){
-          const wStart=ws[d],wEnd=ws[d+1];
-          const dd=dayDelta(wStart,wEnd);
-          const wVal=parseFloat(wEnd);
+          const dd=dayDelta(ws[d],ws[d+1]);
+          const wVal=parseFloat(ws[d+1]);
+          const rec=recs[d]!==undefined&&recs[d]!==''?parseInt(recs[d]):null;
           if(!isNaN(wVal)){
             const col=dd!==null?(parseFloat(dd)<=0?'#2ecc71':'#e74c3c'):'#333';
-            h+=`<div class="hi-day">
+            h+=`<div class="hi-day" style="border-left-color:${col}">
               <span style="display:flex;align-items:center;gap:6px">
                 <span class="dot" style="background:${col}"></span>
                 Tag ${d+1}: <span style="color:#aaa">${wVal.toFixed(1)} kg</span>
+                ${rec!==null?`<span style="color:${rec>=50?'#2ecc71':'#e74c3c'};font-size:9px">${rec}%</span>`:''}
               </span>
               <span style="color:${col};font-weight:700">${dd!==null?((parseFloat(dd)>0?'+':'')+dd+' kg'):'–'}</span>
             </div>`;
-          } else if(wEnd!==''){
-            h+=`<div class="hi-day"><span>Tag ${d+1}: –</span><span>–</span></div>`;
           }
         }
-        // Total
-        const totalStart=parseFloat(ws[0]),totalEnd=parseFloat(ws[5]);
-        if(!isNaN(totalStart)&&!isNaN(totalEnd)){
-          const td=(totalEnd-totalStart).toFixed(1);
+        const tS=parseFloat(ws[0]),tE=parseFloat(ws[5]);
+        if(!isNaN(tS)&&!isNaN(tE)){
+          const td=(tE-tS).toFixed(1);
           const tc=parseFloat(td)<=-0.5?'#2ecc71':'#e74c3c';
           h+=`<div style="display:flex;justify-content:space-between;font-size:10px;padding:6px 0 2px 12px;border-left:2px solid ${tc};margin-top:4px;color:#888">
-            <span style="font-weight:700">Gesamt: ${totalStart.toFixed(1)} → ${totalEnd.toFixed(1)} kg</span>
+            <span style="font-weight:700">Gesamt: ${tS.toFixed(1)} → ${tE.toFixed(1)} kg</span>
             <span style="color:${tc};font-weight:700">${parseFloat(td)>0?'+':''}${td} kg ${parseFloat(td)<=-0.5?'✓':'✗'}</span>
           </div>`;
         }
-        // Note
         if(x.note){h+=`<div style="font-size:10px;color:#444;padding:4px 0 0 12px;font-style:italic">${esc(x.note)}</div>`}
         h+=`</div>`;
       }
@@ -327,44 +480,44 @@ function render(){
     h+=`</div>`;
   }
 
+  // ─── ALGORITHM INFO ──────────────────────────────────
   h+=`<div style="background:#0d0d0d;border:1px dashed #1a1a1a;padding:12px 18px;margin-top:16px;font-size:10px;color:#333;line-height:1.6">
-    <strong style="color:#444">AUTO-ADJUST</strong><br>
+    <strong style="color:#444">REGELN</strong><br>
     ≥0.5kg/5d → weiter, Stall reset<br>
     &lt;0.5kg (1×) → abwarten<br>
-    &lt;0.5kg (2×) → −30g Carbs/Quelle, Stall reset
+    &lt;0.5kg (2×) → −30g Carbs/Quelle<br>
+    4+ Iterationen on track → Refeed-Empfehlung
   </div>`;
-  h+=`<div class="footer"><div class="fr">carbCut: ${S.carbCut}g · stalls: ${S.stallCount}/2</div><button onclick="resetAll()">reset all</button></div>`;
-
-  // Preserve focus before DOM replacement
-  let focusIdx=-1,focusSel=-1,focusIsNote=false;
-  const ae=document.activeElement;
-  if(ae&&ae.tagName==='INPUT'&&ae.type==='number'){
-    const inputs=document.querySelectorAll('.wr input[type="number"]');
-    inputs.forEach((el,i)=>{if(el===ae){focusIdx=i;focusSel=ae.selectionStart}});
-  }
-  if(ae&&ae.tagName==='TEXTAREA'){focusIsNote=true;focusSel=ae.selectionStart}
+  h+=`<div class="footer"><div class="fr">carbCut: ${S.carbCut}g · stalls: ${S.stallCount}/2 · streak: ${S.consecutiveOk}</div><button onclick="resetAll()">reset all</button></div>`;
 
   document.getElementById('app').innerHTML=h;
-
-  // Restore focus after DOM replacement
-  if(focusIdx>=0){
-    const inputs=document.querySelectorAll('.wr input[type="number"]');
-    if(inputs[focusIdx]){inputs[focusIdx].focus();try{inputs[focusIdx].setSelectionRange(focusSel,focusSel)}catch(e){}}
-  }
-  if(focusIsNote){
-    const ta=document.querySelector('textarea');
-    if(ta){ta.focus();try{ta.setSelectionRange(focusSel,focusSel)}catch(e){}}
-  }
 }
 
 // ─── ACTIONS ────────────────────────────────────────────
 function cyc(t){const m={pA:['swapPA',PROTEIN_A.length],pB:['swapPB',PROTEIN_B.length],cA:['swapCA',CARB_BASE.length],cB:['swapCB',CARB_BASE.length],fA:['swapFA',FAT_OPT.length],fB:['swapFB',FAT_OPT.length]};const[k,l]=m[t];S[k]=(S[k]+1)%l;scheduleSave();render()}
 function toggleShop(){S.showShop=!S.showShop;render()}
+
 let renderTimer=null;
 function setW(i,v){S.weights[i]=v;scheduleSave();if(renderTimer)clearTimeout(renderTimer);renderTimer=setTimeout(()=>{const ae=document.activeElement;if(!ae||ae.tagName!=='INPUT'||ae.type!=='number')render()},800)}
+function setR(i,v){S.recovery[i]=v;scheduleSave();if(renderTimer)clearTimeout(renderTimer);renderTimer=setTimeout(()=>{const ae=document.activeElement;if(!ae||ae.tagName!=='INPUT'||ae.type!=='number')render()},800)}
 function setN(v){S.note=v;scheduleSave()}
 function tgl(d,m){S.checks[d][m]=!S.checks[d][m];scheduleSave();render()}
 function toggleHist(iter){S.expandedIter=S.expandedIter===iter?null:iter;render()}
+
+function parseNLP(){
+  const el=document.getElementById('nlp-input');
+  if(!el)return;
+  const raw=el.value.trim();
+  // Parse numbers separated by spaces, commas, semicolons
+  const nums=raw.split(/[\s,;]+/).map(s=>parseFloat(s.replace(',','.'))).filter(n=>!isNaN(n));
+  if(nums.length>=1){
+    for(let i=0;i<Math.min(nums.length,6);i++){
+      S.weights[i]=nums[i].toString();
+    }
+    scheduleSave();
+    render();
+  }
+}
 
 function next(){
   const sW=parseFloat(S.weights[0]),eW=parseFloat(S.weights[5]);
@@ -376,17 +529,21 @@ function next(){
   let action='ok';
   const lost=delta!==null?parseFloat(delta):0;
   if(delta===null||lost<=-0.5){
-    S.stallCount=0;action='ok';
+    S.stallCount=0;
+    S.consecutiveOk++;
+    action='ok';
   } else {
     S.stallCount++;
+    S.consecutiveOk=0;
     if(S.stallCount>=2){S.carbCut+=30;S.stallCount=0;action='cut'}
     else{action='wait'}
   }
 
-  S.history.push({iteration:S.iteration,date:new Date().toISOString().slice(0,10),weights:[...S.weights],delta,adherence:adh,note:S.note,kcal,carbCut:S.carbCut,action});
+  S.history.push({iteration:S.iteration,date:new Date().toISOString().slice(0,10),weights:[...S.weights],recovery:[...S.recovery],delta,adherence:adh,note:S.note,kcal,carbCut:S.carbCut,action});
   S.iteration++;
   S.checks=Array.from({length:5},()=>Array(4).fill(false));
   S.weights=Array(6).fill("");
+  S.recovery=Array(5).fill("");
   S.note="";
   S.expandedIter=null;
   scheduleSave();render();
@@ -396,13 +553,19 @@ function next(){
 async function resetAll(){
   if(!confirm('Alle Daten unwiderruflich löschen?'))return;
   try{await dbDel('state')}catch(e){}
-  S={iteration:1,checks:Array.from({length:5},()=>Array(4).fill(false)),weights:Array(6).fill(""),note:"",history:[],swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,carbCut:0,stallCount:0,showShop:false,expandedIter:null};
+  S={iteration:1,checks:Array.from({length:5},()=>Array(4).fill(false)),weights:Array(6).fill(""),recovery:Array(5).fill(""),note:"",history:[],swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,carbCut:0,stallCount:0,consecutiveOk:0,showShop:false,expandedIter:null};
   render();
 }
 
 // ─── INIT ───────────────────────────────────────────────
 (async()=>{
-  try{const saved=await dbGet('state');if(saved)Object.assign(S,saved)}catch(e){}
+  try{const saved=await dbGet('state');if(saved){
+    // Migrate old state
+    if(!saved.recovery)saved.recovery=Array(5).fill("");
+    if(saved.consecutiveOk===undefined)saved.consecutiveOk=0;
+    if(saved.expandedIter===undefined)saved.expandedIter=null;
+    Object.assign(S,saved);
+  }}catch(e){}
   render();
   if('serviceWorker' in navigator)navigator.serviceWorker.register('/cut-protocol/sw.js').catch(()=>{});
 })();

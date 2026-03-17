@@ -1,4 +1,4 @@
-const CACHE_NAME = "cut-protocol-v4";
+const CACHE_NAME = "cut-protocol-v5";
 const ASSETS = ["/cut-protocol/", "/cut-protocol/index.html", "/cut-protocol/manifest.json", "/cut-protocol/icon-192.png", "/cut-protocol/icon-512.png"];
 
 self.addEventListener("install", (e) => {
