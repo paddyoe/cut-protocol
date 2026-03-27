@@ -95,6 +95,15 @@ textarea{width:100%;background:#111;border:1px solid #222;color:#aaa;padding:8px
 .footer button{background:none;border:none;color:#2a2a2a;font-size:10px;font-family:inherit;cursor:pointer;padding:4px 8px}
 .reset-progress{background:#111;border:1px solid #333;color:#555;padding:8px 16px;font-size:11px;font-family:inherit;cursor:pointer;text-transform:uppercase;font-weight:700;width:100%;margin-top:8px;margin-bottom:10px}
 .reset-progress:active{background:#1a1a1a}
+.manual-adj{background:#111;border:1px solid #222;padding:12px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.manual-adj .ma-label{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px}
+.manual-adj .ma-btns{display:flex;gap:6px;align-items:center}
+.manual-adj .ma-btn{background:#1a1a1a;border:1px solid #333;color:#888;padding:6px 14px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:700}
+.manual-adj .ma-btn:active{background:#222}
+.manual-adj .ma-btn.disabled{opacity:.25;cursor:not-allowed}
+.manual-adj .ma-btn.minus{color:#e74c3c;border-color:#3a1a1a}
+.manual-adj .ma-btn.plus{color:#3498db;border-color:#1a2a3a}
+.manual-adj .ma-preview{font-size:9px;color:#444;margin-top:4px;width:100%}
 </style>
 </head>
 <body>
@@ -110,7 +119,8 @@ async function dbDel(k){const db=await openDB();return new Promise((r,j)=>{const
 
 // ─── CONFIG ─────────────────────────────────────────────
 const GOAL_KG=77,DEADLINE=new Date('2026-08-04');
-const CARB_STEP=20; // grams per adjustment
+const CARB_STEP=20; // grams per AUTO adjustment
+const MANUAL_STEP=30; // grams per MANUAL ad-hoc adjustment
 const SHRED_TARGET=-0.5; // kg per iteration
 const BULK_MIN=0.15,BULK_MAX=0.35; // kg per iteration
 
@@ -182,6 +192,57 @@ function getTotals(){
   const m3=mSum(PROTEIN_A[S.swapPA],cA,VEG3,FAT_OPT[S.swapFA]);
   const m4=mSum(PROTEIN_B[S.swapPB],cB,VEG4,FAT_OPT[S.swapFB]);
   return[FIXED[0].macros,FIXED[1].macros,m3,m4].reduce((a,m)=>({kcal:a.kcal+m.kcal,p:a.p+m.p,f:a.f+m.f,k:a.k+m.k}),{kcal:0,p:0,f:0,k:0});
+}
+
+// ─── MANUAL AD-HOC CARB ADJUSTMENT ─────────────────────
+// Applies ±MANUAL_STEP (30g) to carbAdj, affecting only the 2 adjustable
+// meals (Deftig I & II). Protein and fat remain untouched.
+// Validates that no carb source goes below 0g.
+
+/**
+ * Check if reducing by MANUAL_STEP is safe for both carb sources.
+ * Returns true if both sources would remain ≥ 0g after reduction.
+ */
+function canManualReduce(){
+  return [S.swapCA,S.swapCB].every(idx=>
+    CARB_BASE[idx].baseAmt+(S.carbAdj-MANUAL_STEP)>=0
+  );
+}
+
+/**
+ * Preview what a manual adjustment would look like.
+ * @param {number} dir — +1 to add, -1 to remove
+ * @returns {object} {lines, oldKcal, newKcal, oldCarbs, newCarbs, blocked}
+ */
+function previewManualAdj(dir){
+  const step=dir*MANUAL_STEP;
+  const newAdj=S.carbAdj+step;
+  // Block if any source would go negative
+  const blocked=[S.swapCA,S.swapCB].some(idx=>CARB_BASE[idx].baseAmt+newAdj<0);
+  const lines=[];
+  [S.swapCA,S.swapCB].forEach((idx,i)=>{
+    const c=CARB_BASE[idx];
+    const oldAmt=Math.max(0,Math.round(c.baseAmt+S.carbAdj));
+    const newAmt=Math.max(0,Math.round(c.baseAmt+newAdj));
+    lines.push({label:i===0?'Deftig I':'Deftig II',food:c.food,oldAmt,newAmt,unit:c.unit});
+  });
+  const oldTot=getTotals();
+  const saved=S.carbAdj;S.carbAdj=newAdj;
+  const newTot=getTotals();S.carbAdj=saved;
+  return{lines,oldKcal:oldTot.kcal,newKcal:newTot.kcal,oldCarbs:oldTot.k,newCarbs:newTot.k,blocked};
+}
+
+/**
+ * Apply a manual ad-hoc carb adjustment.
+ * @param {number} dir — +1 to add 30g, -1 to remove 30g
+ * Does NOT reset stallCount or consecutiveOk — this is purely manual.
+ * The auto-algorithm continues independently on next iteration close.
+ */
+function manualAdj(dir){
+  if(dir<0&&!canManualReduce()){return} // safety: no negative carbs
+  S.carbAdj+=dir*MANUAL_STEP;
+  scheduleSave();
+  render();
 }
 
 // ─── CONCRETE RECOMMENDATION ────────────────────────────
@@ -315,6 +376,26 @@ function render(){
       ${S.consecutiveOk>=3&&isShred?`<span class="tag tag-ok">🔥 ${S.consecutiveOk}</span>`:''}
     </div>
     <span style="font-size:10px;color:#444">${cA.food} ${cA.amt}${cA.unit} · ${cB.food} ${cB.amt}${cB.unit}</span>
+  </div>`;
+
+  // ─── MANUAL CARB ADJUSTMENT ──────────────────────────
+  // Ad-hoc ±30g control, independent of auto-algorithm.
+  // Only affects Deftig I & II (the 2 adjustable meals).
+  const canReduce=canManualReduce();
+  const previewMinus=canReduce?previewManualAdj(-1):null;
+  const previewPlus=previewManualAdj(1);
+  h+=`<div class="manual-adj">
+    <div>
+      <div class="ma-label">Manuelle Carb-Anpassung (±${MANUAL_STEP}g/Quelle)</div>
+      <div class="ma-preview">
+        ${canReduce&&previewMinus?`−${MANUAL_STEP}g → ${previewMinus.newKcal} kcal / ${previewMinus.newCarbs}g K`:'−'+MANUAL_STEP+'g → Minimum erreicht'}
+         · +${MANUAL_STEP}g → ${previewPlus.newKcal} kcal / ${previewPlus.newCarbs}g K
+      </div>
+    </div>
+    <div class="ma-btns">
+      <button class="ma-btn minus${canReduce?'':' disabled'}" onclick="${canReduce?'manualAdj(-1)':''}">−${MANUAL_STEP}g</button>
+      <button class="ma-btn plus" onclick="manualAdj(1)">+${MANUAL_STEP}g</button>
+    </div>
   </div>`;
 
   // ─── PROJECTION ──────────────────────────────────────
@@ -488,8 +569,8 @@ function render(){
   // ─── RULES ───────────────────────────────────────────
   h+=`<div style="background:#0d0d0d;border:1px dashed #1a1a1a;padding:12px 18px;margin-top:16px;font-size:10px;color:#333;line-height:1.6">
     <strong style="color:#444">${isShred?'SHRED':'BULK'} ALGORITHMUS</strong><br>
-    ${isShred?`≥0.5kg Verlust/5d → weiter<br>&lt;0.5kg (1×) → abwarten<br>&lt;0.5kg (2×) → −${CARB_STEP}g Carbs/Quelle<br>4+ on track → Refeed`
-    :`+0.15 bis +0.35kg/5d → Sweet Spot<br>&gt;0.35kg (1×) → abwarten, (2×) → −${CARB_STEP}g<br>&lt;0.15kg (1×) → abwarten, (2×) → +${CARB_STEP}g`}
+    ${isShred?`≥0.5kg Verlust/5d → weiter<br>&lt;0.5kg (1×) → abwarten<br>&lt;0.5kg (2×) → −${CARB_STEP}g Carbs/Quelle (auto)<br>4+ on track → Refeed<br>Manuell: ±${MANUAL_STEP}g jederzeit`
+    :`+0.15 bis +0.35kg/5d → Sweet Spot<br>&gt;0.35kg (1×) → abwarten, (2×) → −${CARB_STEP}g (auto)<br>&lt;0.15kg (1×) → abwarten, (2×) → +${CARB_STEP}g (auto)<br>Manuell: ±${MANUAL_STEP}g jederzeit`}
   </div>`;
   h+=`<div class="footer"><div class="fr">adj: ${S.carbAdj>0?'+':''}${S.carbAdj}g · stalls: ${S.stallCount}/2${isShred?` · streak: ${S.consecutiveOk}`:''}</div><button onclick="resetAll()">reset all</button></div>`;
 
