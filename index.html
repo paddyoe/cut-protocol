@@ -14,35 +14,26 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0a0a;color:#e0e0e0;font-family:'JetBrains Mono','SF Mono','Fira Code',monospace;-webkit-tap-highlight-color:transparent}
 .root{max-width:720px;margin:0 auto;padding:20px;min-height:100vh;padding-bottom:env(safe-area-inset-bottom,20px)}
-
-/* Mode toggle */
-.mode-bar{display:flex;margin-bottom:20px;border:1px solid #333}
-.mode-btn{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;text-transform:uppercase;border:none;transition:background .15s}
-.mode-btn.shred{background:#1f0a0a;color:#e74c3c}
-.mode-btn.shred.active{background:#e74c3c;color:#fff}
-.mode-btn.bulk{background:#0a1f0a;color:#2ecc71}
-.mode-btn.bulk.active{background:#2ecc71;color:#000}
-
-.header{border-bottom:2px solid #333;padding-bottom:14px;margin-bottom:20px}
+.header{border-bottom:2px solid #333;padding-bottom:14px;margin-bottom:0}
 .header h1{font-size:20px;font-weight:700;color:#fff;letter-spacing:-0.5px;display:inline}
 .header .iter{font-size:13px;color:#666;float:right}
 .header .meta{font-size:11px;color:#555;margin-top:4px;display:flex;gap:14px;flex-wrap:wrap;clear:both}
+/* ── TABS ── */
+.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #333}
+.tab-btn{flex:1;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:12px 0 10px;font-size:11px;font-weight:700;font-family:inherit;color:#444;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:color .15s,border-color .15s}
+.tab-btn.active{color:#fff;border-bottom-color:#fff}
+.tab-btn:active{opacity:.7}
+/* ── existing styles ── */
 .totals{background:#141414;border:1px solid #2a2a2a;padding:14px 18px;margin-bottom:14px;display:flex;justify-content:space-between}
 .totals .t{text-align:center}
 .totals .tv{font-size:22px;font-weight:700}
 .totals .tl{font-size:10px;color:#666;text-transform:uppercase}
 .status-bar{background:#111;border:1px solid #222;padding:10px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.tag{font-size:10px;padding:3px 8px;font-weight:700;font-family:inherit;border-radius:2px;display:inline-block}
+.tag{font-size:10px;padding:3px 8px;font-weight:700;font-family:inherit;border-radius:2px}
 .tag-ok{background:#0a1f0a;border:1px solid #2ecc71;color:#2ecc71}
 .tag-warn{background:#1f1a0a;border:1px solid #f39c12;color:#f39c12}
 .tag-cut{background:#1f0a0a;border:1px solid #e74c3c;color:#e74c3c}
-.tag-add{background:#0a1a1f;border:1px solid #3498db;color:#3498db}
 .tag-refeed{background:#0a1a1f;border:1px solid #3498db;color:#3498db}
-.rec-box{background:#111;border:1px solid #333;padding:12px 18px;margin-bottom:14px}
-.rec-box .rec-title{font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:8px}
-.rec-box .rec-line{display:flex;justify-content:space-between;font-size:11px;color:#666;padding:2px 0}
-.rec-box .rec-old{color:#555;text-decoration:line-through}
-.rec-box .rec-new{font-weight:700}
 .meal{background:#111;border:1px solid #222;margin-bottom:10px;padding:14px 18px}
 .meal .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .meal .mn{font-size:14px;font-weight:700;color:#fff}
@@ -71,9 +62,15 @@ body{background:#0a0a0a;color:#e0e0e0;font-family:'JetBrains Mono','SF Mono','Fi
 .grid .gc{padding:5px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:700;border:1px solid #2a2a2a;background:#1a1a1a;color:#333}
 .grid .gc.on{background:#2ecc71;border-color:#27ae60;color:#000}
 .eval{margin-bottom:10px;padding:14px 18px}
+.eval.ok{background:#0a1f0a;border:1px solid #2ecc71}
+.eval.no{background:#1f0a0a;border:1px solid #e74c3c}
+.eval.wait{background:#1f1a0a;border:1px solid #f39c12}
 .eval .ev{font-size:13px;font-weight:700}
 .eval .ed{font-size:11px;color:#888;margin-top:4px}
 textarea{width:100%;background:#111;border:1px solid #222;color:#aaa;padding:8px;font-size:12px;font-family:inherit;min-height:36px;resize:vertical;outline:none;box-sizing:border-box;margin-top:4px}
+.nlp-box{background:#111;border:1px solid #222;padding:10px 14px;margin-bottom:14px}
+.nlp-box input{width:100%;background:#141414;border:1px solid #2a2a2a;color:#fff;padding:8px;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box}
+.nlp-hint{font-size:9px;color:#333;margin-top:4px}
 .proj{background:#111;border:1px solid #222;padding:14px 18px;margin-bottom:14px}
 .proj .pv{font-size:16px;font-weight:700}
 .proj .pd{font-size:10px;color:#555;margin-top:4px}
@@ -93,17 +90,23 @@ textarea{width:100%;background:#111;border:1px solid #222;color:#aaa;padding:8px
 .footer{display:flex;justify-content:space-between;align-items:center;margin-top:24px;border-top:1px solid #1a1a1a;padding-top:12px}
 .footer .fr{font-size:10px;color:#333}
 .footer button{background:none;border:none;color:#2a2a2a;font-size:10px;font-family:inherit;cursor:pointer;padding:4px 8px}
-.reset-progress{background:#111;border:1px solid #333;color:#555;padding:8px 16px;font-size:11px;font-family:inherit;cursor:pointer;text-transform:uppercase;font-weight:700;width:100%;margin-top:8px;margin-bottom:10px}
-.reset-progress:active{background:#1a1a1a}
-.manual-adj{background:#111;border:1px solid #222;padding:12px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.manual-adj .ma-label{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px}
-.manual-adj .ma-btns{display:flex;gap:6px;align-items:center}
-.manual-adj .ma-btn{background:#1a1a1a;border:1px solid #333;color:#888;padding:6px 14px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:700}
-.manual-adj .ma-btn:active{background:#222}
-.manual-adj .ma-btn.disabled{opacity:.25;cursor:not-allowed}
-.manual-adj .ma-btn.minus{color:#e74c3c;border-color:#3a1a1a}
-.manual-adj .ma-btn.plus{color:#3498db;border-color:#1a2a3a}
-.manual-adj .ma-preview{font-size:9px;color:#444;margin-top:4px;width:100%}
+/* ── MEAL PLAN ── */
+.mp-weeknav{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.mp-weeknav button{background:none;border:1px solid #2a2a2a;color:#555;font-size:12px;font-family:inherit;padding:5px 12px;cursor:pointer}
+.mp-weeknav button:disabled{opacity:.25;pointer-events:none}
+.mp-weeknav button:active{opacity:.6}
+.mp-target{background:#141414;border:1px solid #2a2a2a;padding:10px 14px;margin-bottom:14px;font-size:10px;color:#555;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.mp-day{background:#111;border:1px solid #1a1a1a;margin-bottom:8px}
+.mp-day.today{border-color:#333}
+.mp-day-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 8px}
+.mp-pbar{height:2px;background:#1a1a1a;margin:0 14px 8px}
+.mp-pbar-fill{height:100%;transition:width .3s}
+.mp-meals{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 14px 10px}
+.mp-meal-btn{background:#141414;border:1px solid #2a2a2a;color:#555;padding:8px 10px;font-size:11px;font-family:inherit;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;transition:background .1s,border-color .1s,color .1s}
+.mp-meal-btn.checked{background:#0d1f0d;border-color:#27ae60;color:#2ecc71}
+.mp-meal-btn:active{opacity:.7}
+.mp-day-macros{display:flex;justify-content:space-between;padding:0 14px 10px;font-size:10px;color:#444}
+.mp-week-summary{background:#141414;border:1px solid #2a2a2a;padding:14px 18px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -111,18 +114,15 @@ textarea{width:100%;background:#111;border:1px solid #222;color:#aaa;padding:8px
 
 <script>
 // ─── IndexedDB ──────────────────────────────────────────
-const DB='CutProtocolDB';
-function openDB(){return new Promise((r,j)=>{const q=indexedDB.open(DB,1);q.onupgradeneeded=e=>{if(!e.target.result.objectStoreNames.contains('kv'))e.target.result.createObjectStore('kv')};q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)})}
+const DB_NAME='CutProtocolDB',DB_VER=1;
+function openDB(){return new Promise((r,j)=>{const q=indexedDB.open(DB_NAME,DB_VER);q.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains('kv'))db.createObjectStore('kv')};q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)})}
 async function dbGet(k){const db=await openDB();return new Promise((r,j)=>{const t=db.transaction('kv','readonly').objectStore('kv').get(k);t.onsuccess=()=>r(t.result??null);t.onerror=()=>j(t.error)})}
 async function dbSet(k,v){const db=await openDB();return new Promise((r,j)=>{const t=db.transaction('kv','readwrite').objectStore('kv').put(v,k);t.onsuccess=()=>r();t.onerror=()=>j(t.error)})}
 async function dbDel(k){const db=await openDB();return new Promise((r,j)=>{const t=db.transaction('kv','readwrite').objectStore('kv').delete(k);t.onsuccess=()=>r();t.onerror=()=>j(t.error)})}
 
 // ─── CONFIG ─────────────────────────────────────────────
-const GOAL_KG=77,DEADLINE=new Date('2026-08-04');
-const CARB_STEP=20; // grams per AUTO adjustment
-const MANUAL_STEP=30; // grams per MANUAL ad-hoc adjustment
-const SHRED_TARGET=-0.5; // kg per iteration
-const BULK_MIN=0.15,BULK_MAX=0.35; // kg per iteration
+const START_KG=88.2,GOAL_KG=77,START_KFA=22.9,GOAL_KFA=12;
+const DEADLINE=new Date('2026-08-04');
 
 // ─── FOOD DATA ──────────────────────────────────────────
 const PROTEIN_A=[
@@ -136,9 +136,9 @@ const PROTEIN_B=[
   {food:"Kabeljau",amt:200,unit:"g (roh)",p:36,f:2,k:0,kcal:165}
 ];
 const CARB_BASE=[
-  {food:"Reis",baseAmt:60,unit:"g (roh)",pG:.07,fG:.01,kG:.78,kcG:3.58},
-  {food:"Nudeln",baseAmt:60,unit:"g (roh)",pG:.11,fG:.02,kG:.69,kcG:3.56},
-  {food:"Kartoffeln",baseAmt:200,unit:"g",pG:.02,fG:.001,kG:.15,kcG:.73}
+  {food:"Reis",baseAmt:60,unit:"g (roh)",pG:0.07,fG:0.01,kG:0.78,kcG:3.58},
+  {food:"Nudeln",baseAmt:60,unit:"g (roh)",pG:0.11,fG:0.02,kG:0.69,kcG:3.56},
+  {food:"Kartoffeln",baseAmt:200,unit:"g",pG:0.02,fG:0.001,kG:0.15,kcG:0.73}
 ];
 const FAT_OPT=[
   {food:"Olivenöl",amt:10,unit:"ml",p:0,f:10,k:0,kcal:90},
@@ -147,169 +147,125 @@ const FAT_OPT=[
 ];
 const FIXED=[
   {name:"Porridge",items:[
-    {food:"Haferflocken",amt:50,unit:"g"},{food:"Whey Protein",amt:50,unit:"g"},
-    {food:"Obst",amt:100,unit:"g"},{food:"Lindt 85%",amt:15,unit:"g"},
-    {food:"Flohsamenschalen",amt:4,unit:"g"},{food:"Mandelmilch",amt:200,unit:"ml"}
+    {food:"Haferflocken",amt:50,unit:"g"},
+    {food:"Whey Protein",amt:50,unit:"g"},
+    {food:"Obst",amt:100,unit:"g"},
+    {food:"Lindt 85%",amt:15,unit:"g"},
+    {food:"Flohsamenschalen",amt:4,unit:"g"},
+    {food:"Mandelmilch",amt:200,unit:"ml"}
   ],macros:{kcal:552,p:49,f:14,k:54}},
   {name:"Skyr Bowl",items:[
-    {food:"Skyr",amt:400,unit:"g"},{food:"Apfel",amt:1,unit:"Stück"},
-    {food:"Leinsamen",amt:10,unit:"g"},{food:"Paranuss",amt:10,unit:"g"}
+    {food:"Skyr",amt:400,unit:"g"},
+    {food:"Apfel",amt:1,unit:"Stück"},
+    {food:"Leinsamen",amt:10,unit:"g"},
+    {food:"Paranuss",amt:10,unit:"g"}
   ],macros:{kcal:474,p:48,f:12,k:41}}
 ];
 const VEG3={food:"Brokkoli",amt:200,unit:"g",p:6,f:0,k:4,kcal:35};
 const VEG4={food:"Grüne Bohnen",amt:200,unit:"g",p:4,f:0,k:6,kcal:40};
 
 // ─── STATE ──────────────────────────────────────────────
-const DEFAULT_STATE=()=>({
-  mode:'shred', // 'shred' or 'bulk'
+let S={
   iteration:1,
+  activeTab:'protokoll',
   checks:Array.from({length:5},()=>Array(4).fill(false)),
   weights:Array(6).fill(""),
   recovery:Array(5).fill(""),
   note:"",
   history:[],
   swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,
-  carbAdj:0, // positive = added, negative = removed (in grams, cumulative)
-  stallCount:0,
+  carbCut:0,stallCount:0,
   consecutiveOk:0,
   showShop:false,
-  expandedIter:null
-});
-let S=DEFAULT_STATE();
+  expandedIter:null,
+  // Meal Plan
+  mealLog:{},       // {"2026-03-24":[true,false,true,false]}
+  mealWeekOffset:0  // 0 = current week, -1 = last week
+};
 let saveTimer=null;
 function scheduleSave(){if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(()=>dbSet('state',S).catch(()=>{}),300)}
 
 // ─── HELPERS ────────────────────────────────────────────
-function getCarb(idx,adj){
-  const c=CARB_BASE[idx],amt=Math.max(0,c.baseAmt+adj);
+function getCarb(idx,cut){
+  const c=CARB_BASE[idx],amt=Math.max(0,c.baseAmt-cut);
   return{food:c.food,amt:Math.round(amt),unit:c.unit,p:Math.round(amt*c.pG),f:Math.round(amt*c.fG),k:Math.round(amt*c.kG),kcal:Math.round(amt*c.kcG)};
 }
 function mSum(...ii){return ii.reduce((a,b)=>({kcal:a.kcal+b.kcal,p:a.p+b.p,f:a.f+b.f,k:a.k+b.k}),{kcal:0,p:0,f:0,k:0})}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function dd(a,b){const x=parseFloat(a),y=parseFloat(b);return(!isNaN(x)&&!isNaN(y))?(y-x).toFixed(1):null}
-function getTotals(){
-  const cA=getCarb(S.swapCA,S.carbAdj),cB=getCarb(S.swapCB,S.carbAdj);
-  const m3=mSum(PROTEIN_A[S.swapPA],cA,VEG3,FAT_OPT[S.swapFA]);
-  const m4=mSum(PROTEIN_B[S.swapPB],cB,VEG4,FAT_OPT[S.swapFB]);
-  return[FIXED[0].macros,FIXED[1].macros,m3,m4].reduce((a,m)=>({kcal:a.kcal+m.kcal,p:a.p+m.p,f:a.f+m.f,k:a.k+m.k}),{kcal:0,p:0,f:0,k:0});
+function dayDelta(a,b){const x=parseFloat(a),y=parseFloat(b);return(!isNaN(x)&&!isNaN(y))?(y-x).toFixed(1):null}
+function dateKey(d){return d.toISOString().slice(0,10)}
+
+// ─── WEEK HELPERS ────────────────────────────────────────
+function getMondayOfWeek(offset){
+  const d=new Date();
+  const day=d.getDay();
+  const mon=new Date(d);
+  mon.setDate(d.getDate()-(day===0?6:day-1)+(offset||0)*7);
+  mon.setHours(0,0,0,0);
+  return mon;
 }
-
-// ─── MANUAL AD-HOC CARB ADJUSTMENT ─────────────────────
-// Applies ±MANUAL_STEP (30g) to carbAdj, affecting only the 2 adjustable
-// meals (Deftig I & II). Protein and fat remain untouched.
-// Validates that no carb source goes below 0g.
-
-/**
- * Check if reducing by MANUAL_STEP is safe for both carb sources.
- * Returns true if both sources would remain ≥ 0g after reduction.
- */
-function canManualReduce(){
-  return [S.swapCA,S.swapCB].every(idx=>
-    CARB_BASE[idx].baseAmt+(S.carbAdj-MANUAL_STEP)>=0
-  );
+function getWeekDays(offset){
+  const mon=getMondayOfWeek(offset);
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d});
 }
-
-/**
- * Preview what a manual adjustment would look like.
- * @param {number} dir — +1 to add, -1 to remove
- * @returns {object} {lines, oldKcal, newKcal, oldCarbs, newCarbs, blocked}
- */
-function previewManualAdj(dir){
-  const step=dir*MANUAL_STEP;
-  const newAdj=S.carbAdj+step;
-  // Block if any source would go negative
-  const blocked=[S.swapCA,S.swapCB].some(idx=>CARB_BASE[idx].baseAmt+newAdj<0);
-  const lines=[];
-  [S.swapCA,S.swapCB].forEach((idx,i)=>{
-    const c=CARB_BASE[idx];
-    const oldAmt=Math.max(0,Math.round(c.baseAmt+S.carbAdj));
-    const newAmt=Math.max(0,Math.round(c.baseAmt+newAdj));
-    lines.push({label:i===0?'Deftig I':'Deftig II',food:c.food,oldAmt,newAmt,unit:c.unit});
-  });
-  const oldTot=getTotals();
-  const saved=S.carbAdj;S.carbAdj=newAdj;
-  const newTot=getTotals();S.carbAdj=saved;
-  return{lines,oldKcal:oldTot.kcal,newKcal:newTot.kcal,oldCarbs:oldTot.k,newCarbs:newTot.k,blocked};
-}
-
-/**
- * Apply a manual ad-hoc carb adjustment.
- * @param {number} dir — +1 to add 30g, -1 to remove 30g
- * Does NOT reset stallCount or consecutiveOk — this is purely manual.
- * The auto-algorithm continues independently on next iteration close.
- */
-function manualAdj(dir){
-  if(dir<0&&!canManualReduce()){return} // safety: no negative carbs
-  S.carbAdj+=dir*MANUAL_STEP;
-  scheduleSave();
-  render();
-}
-
-// ─── CONCRETE RECOMMENDATION ────────────────────────────
-function getRecommendation(direction){
-  // direction: -1 = reduce carbs, +1 = increase carbs
-  const step=direction*CARB_STEP;
-  const newAdj=S.carbAdj+step;
-  const lines=[];
-  [S.swapCA,S.swapCB].forEach((idx,i)=>{
-    const c=CARB_BASE[idx];
-    const oldAmt=Math.max(0,Math.round(c.baseAmt+S.carbAdj));
-    const newAmt=Math.max(0,Math.round(c.baseAmt+newAdj));
-    const label=i===0?'Deftig I':'Deftig II';
-    lines.push({label,food:c.food,oldAmt,newAmt,unit:c.unit});
-  });
-  const oldTot=getTotals();
-  const savedAdj=S.carbAdj;
-  S.carbAdj=newAdj;
-  const newTot=getTotals();
-  S.carbAdj=savedAdj;
-  return{lines,oldKcal:oldTot.kcal,newKcal:newTot.kcal,oldCarbs:oldTot.k,newCarbs:newTot.k,step};
+function getISOWeek(d){
+  const date=new Date(d);date.setHours(0,0,0,0);
+  date.setDate(date.getDate()+3-(date.getDay()+6)%7);
+  const w1=new Date(date.getFullYear(),0,4);
+  return 1+Math.round(((date-w1)/86400000-3+(w1.getDay()+6)%7)/7);
 }
 
 // ─── PROJECTION ─────────────────────────────────────────
 function getProjection(){
-  const pts=[];let dayIdx=0;
+  const pts=[];
+  let dayIdx=0;
   S.history.forEach(h=>{(h.weights||[]).forEach(w=>{const v=parseFloat(w);if(!isNaN(v))pts.push({x:dayIdx,y:v});dayIdx++})});
   S.weights.forEach(w=>{const v=parseFloat(w);if(!isNaN(v))pts.push({x:dayIdx,y:v});dayIdx++});
   if(pts.length<3)return null;
-  const n=pts.length,sx=pts.reduce((a,p)=>a+p.x,0),sy=pts.reduce((a,p)=>a+p.y,0);
+  const n=pts.length;
+  const sx=pts.reduce((a,p)=>a+p.x,0),sy=pts.reduce((a,p)=>a+p.y,0);
   const sxy=pts.reduce((a,p)=>a+p.x*p.y,0),sxx=pts.reduce((a,p)=>a+p.x*p.x,0);
-  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx),intercept=(sy-slope*sx)/n;
-  if(S.mode==='shred'&&slope>=0)return{msg:"Kein Abwärtstrend.",date:null};
-  if(S.mode==='bulk'&&slope<=0)return{msg:"Kein Aufwärtstrend.",date:null};
+  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
+  const intercept=(sy-slope*sx)/n;
+  if(slope>=0)return{msg:"Kein Abwärtstrend erkennbar.",date:null,daysLeft:null,onTime:null,rate:0};
   const lastPt=pts[pts.length-1];
-  const target=S.mode==='shred'?GOAL_KG:null;
-  if(!target)return{msg:`Trend: ${(slope*7).toFixed(2)} kg/Woche`,rate:slope*7,currentW:lastPt.y,date:null};
-  const dToGoal=(target-intercept)/slope-lastPt.x;
-  const projDate=new Date(Date.now()+dToGoal*864e5);
-  return{date:projDate,daysLeft:Math.round(dToGoal),onTime:projDate<=DEADLINE,rate:slope*7,currentW:lastPt.y,deadlineDays:Math.ceil((DEADLINE-Date.now())/864e5)};
+  const daysToGoal=(GOAL_KG-intercept)/slope-lastPt.x;
+  const today=new Date();
+  const projDate=new Date(today.getTime()+daysToGoal*86400000);
+  const weeklyRate=slope*7;
+  return{date:projDate,daysLeft:Math.round(daysToGoal),onTime:projDate<=DEADLINE,rate:weeklyRate,currentW:lastPt.y,deadlineDays:Math.ceil((DEADLINE-today)/86400000)};
 }
 
 // ─── WHOOP CORRELATION ──────────────────────────────────
-function getCorr(){
+function getRecoveryCorrelation(){
   const valid=S.history.filter(h=>h.recovery&&h.recovery.some(r=>r!==''&&r!==null));
   if(valid.length<3)return null;
-  const data=valid.map(h=>{const recs=h.recovery.map(Number).filter(n=>!isNaN(n));const avg=recs.length?recs.reduce((a,b)=>a+b,0)/recs.length:null;return{avg,d:h.delta!==null?parseFloat(h.delta):null}}).filter(d=>d.avg!==null&&d.d!==null);
+  const data=valid.map(h=>{
+    const recs=h.recovery.map(Number).filter(n=>!isNaN(n));
+    const avgRec=recs.length>0?recs.reduce((a,b)=>a+b,0)/recs.length:null;
+    const delta=h.delta!==null?parseFloat(h.delta):null;
+    return{avgRec,delta};
+  }).filter(d=>d.avgRec!==null&&d.delta!==null);
   if(data.length<3)return null;
-  const low=data.filter(d=>d.avg<50),high=data.filter(d=>d.avg>=50);
-  const aLoss=d=>d.length?d.reduce((a,x)=>a+x.d,0)/d.length:0;
-  return{lowAvg:aLoss(low),highAvg:aLoss(high),avgAll:data.reduce((a,d)=>a+d.avg,0)/data.length,stallsLow:data.filter(d=>d.d>SHRED_TARGET&&d.avg<50).length,totalStalls:data.filter(d=>d.d>SHRED_TARGET).length,lc:low.length,hc:high.length};
+  const low=data.filter(d=>d.avgRec<50),high=data.filter(d=>d.avgRec>=50);
+  const avgLoss=d=>d.length?d.reduce((a,x)=>a+x.delta,0)/d.length:0;
+  const stallsWithLowRec=data.filter(d=>d.delta>-0.5&&d.avgRec<50).length;
+  const totalStalls=data.filter(d=>d.delta>-0.5).length;
+  return{lowAvg:avgLoss(low),highAvg:avgLoss(high),avgRecAll:data.reduce((a,d)=>a+d.avgRec,0)/data.length,stallsWithLowRec,totalStalls,lowCount:low.length,highCount:high.length};
 }
 
-// ─── REFEED ─────────────────────────────────────────────
+// ─── REFEED LOGIC ───────────────────────────────────────
 function shouldRefeed(){
-  if(S.mode!=='shred')return null;
-  if(S.consecutiveOk>=4)return{msg:`${S.consecutiveOk} Iterationen im Defizit. Strategischer Refeed: 1 Tag Carbs +100g, Fett −20g, ~2600 kcal Maintenance.`};
-  const l2=S.history.slice(-2);
-  if(l2.length===2&&l2.every(h=>h.adherence<60))return{msg:'2× Adherence unter 60%. Refeed-Tag als Reset: 1 Tag Maintenance, dann weiter.'};
+  if(S.consecutiveOk>=4)return{reason:'streak',msg:`${S.consecutiveOk} Iterationen in Folge im Defizit. Strategischer Refeed empfohlen — 1 Tag Carbs hoch (Base +100g), Fett runter, Kalorien auf Maintenance (~2600 kcal). Verhindert metabolische Adaption.`};
+  const last2=S.history.slice(-2);
+  if(last2.length===2&&last2.every(h=>h.adherence<60))return{reason:'adherence',msg:'Adherence unter 60% in den letzten 2 Iterationen. Refeed-Tag kann helfen: psychologischer Reset, Leptin-Boost. 1 Tag Maintenance, dann weiter.'};
   return null;
 }
 
-// ─── RENDER ─────────────────────────────────────────────
-function render(){
-  const isShred=S.mode==='shred';
+// ─── RENDER PROTOKOLL ───────────────────────────────────
+function renderProtokoll(){
   const pA=PROTEIN_A[S.swapPA],pB=PROTEIN_B[S.swapPB];
-  const cA=getCarb(S.swapCA,S.carbAdj),cB=getCarb(S.swapCB,S.carbAdj);
+  const cA=getCarb(S.swapCA,S.carbCut),cB=getCarb(S.swapCB,S.carbCut);
   const fA=FAT_OPT[S.swapFA],fB=FAT_OPT[S.swapFB];
   const m3=mSum(pA,cA,VEG3,fA),m4=mSum(pB,cB,VEG4,fB);
   const meals=[
@@ -329,130 +285,57 @@ function render(){
   const tot=meals.reduce((a,m)=>({kcal:a.kcal+m.macros.kcal,p:a.p+m.macros.p,f:a.f+m.macros.f,k:a.k+m.macros.k}),{kcal:0,p:0,f:0,k:0});
   const sW=parseFloat(S.weights[0]),eW=parseFloat(S.weights[5]);
   const delta=(!isNaN(sW)&&!isNaN(eW))?(eW-sW).toFixed(1):null;
-  const dv=delta!==null?parseFloat(delta):null;
+  const onTrack=delta!==null&&parseFloat(delta)<=-0.5;
   const adh=Math.round(S.checks.flat().filter(Boolean).length/20*100);
-
-  // Determine evaluation
-  let evalType,evalMsg,recDir=0;
-  if(delta===null){evalType='none'}
-  else if(isShred){
-    if(dv<=SHRED_TARGET){evalType='ok';evalMsg=`${delta} kg — on track.`}
-    else if(S.stallCount>=1){evalType='cut';evalMsg=`${delta} kg — 2. Stall. Carbs werden reduziert.`;recDir=-1}
-    else{evalType='wait';evalMsg=`${delta} kg — 1. Stall. Nächste Iteration abwarten.`}
-  } else { // bulk
-    if(dv>=BULK_MIN&&dv<=BULK_MAX){evalType='ok';evalMsg=`+${delta} kg — Sweet Spot.`}
-    else if(dv>BULK_MAX){
-      if(S.stallCount>=1){evalType='cut';evalMsg=`+${delta} kg — 2× zu schnell. Carbs reduzieren.`;recDir=-1}
-      else{evalType='wait';evalMsg=`+${delta} kg — etwas zu schnell. Abwarten.`}
-    } else {
-      if(S.stallCount>=1){evalType='add';evalMsg=`${dv>0?'+':''}${delta} kg — 2× zu wenig. Carbs erhöhen.`;recDir=1}
-      else{evalType='wait';evalMsg=`${dv>0?'+':''}${delta} kg — zu wenig Zunahme. Abwarten.`}
-    }
-  }
-
-  const modeCol=isShred?'#e74c3c':'#2ecc71';
+  let nextAct=delta===null?'none':onTrack?'ok':S.stallCount>=1?'cut':'wait';
 
   let h=`
-  <div class="mode-bar">
-    <button class="mode-btn shred${isShred?' active':''}" onclick="setMode('shred')">🔥 Shred</button>
-    <button class="mode-btn bulk${!isShred?' active':''}" onclick="setMode('bulk')">💪 Bulk</button>
-  </div>
-
-  <div class="header"><h1>CUT PROTOCOL</h1><span class="iter">#${S.iteration}</span>
-    <div class="meta">
-      <span style="color:${modeCol};font-weight:700">${isShred?'SHRED':'BULK'}</span>
-      <span>${isShred?'→ '+GOAL_KG+'kg':'Lean Gains'}</span>
-      <span>Deadline 04.08.2026</span>
-    </div></div>
-
   <div class="totals">
     ${[['kcal',tot.kcal,'#fff'],['Protein',tot.p+'g','#e74c3c'],['Fett',tot.f+'g','#f39c12'],['Carbs',tot.k+'g','#3498db']].map(([l,v,c])=>`<div class="t"><div class="tv" style="color:${c}">${v}</div><div class="tl">${l}</div></div>`).join('')}
   </div>
 
   <div class="status-bar">
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-      ${S.carbAdj===0?'<span class="tag tag-ok">BASE</span>':S.carbAdj<0?`<span class="tag tag-cut">${S.carbAdj}g</span>`:`<span class="tag tag-add">+${S.carbAdj}g</span>`}
+      ${S.carbCut===0?'<span class="tag tag-ok">BASE CARBS</span>':`<span class="tag tag-cut">−${S.carbCut}g CARBS</span>`}
       ${S.stallCount>0?`<span class="tag tag-warn">STALL ${S.stallCount}/2</span>`:''}
-      ${S.consecutiveOk>=3&&isShred?`<span class="tag tag-ok">🔥 ${S.consecutiveOk}</span>`:''}
+      ${S.consecutiveOk>=3?`<span class="tag tag-ok">🔥 ${S.consecutiveOk} STREAK</span>`:''}
     </div>
     <span style="font-size:10px;color:#444">${cA.food} ${cA.amt}${cA.unit} · ${cB.food} ${cB.amt}${cB.unit}</span>
   </div>`;
 
-  // ─── MANUAL CARB ADJUSTMENT ──────────────────────────
-  // Ad-hoc ±30g control, independent of auto-algorithm.
-  // Only affects Deftig I & II (the 2 adjustable meals).
-  const canReduce=canManualReduce();
-  const previewMinus=canReduce?previewManualAdj(-1):null;
-  const previewPlus=previewManualAdj(1);
-  h+=`<div class="manual-adj">
-    <div>
-      <div class="ma-label">Manuelle Carb-Anpassung (±${MANUAL_STEP}g/Quelle)</div>
-      <div class="ma-preview">
-        ${canReduce&&previewMinus?`−${MANUAL_STEP}g → ${previewMinus.newKcal} kcal / ${previewMinus.newCarbs}g K`:'−'+MANUAL_STEP+'g → Minimum erreicht'}
-         · +${MANUAL_STEP}g → ${previewPlus.newKcal} kcal / ${previewPlus.newCarbs}g K
-      </div>
-    </div>
-    <div class="ma-btns">
-      <button class="ma-btn minus${canReduce?'':' disabled'}" onclick="${canReduce?'manualAdj(-1)':''}">−${MANUAL_STEP}g</button>
-      <button class="ma-btn plus" onclick="manualAdj(1)">+${MANUAL_STEP}g</button>
-    </div>
-  </div>`;
-
-  // ─── PROJECTION ──────────────────────────────────────
   const proj=getProjection();
   if(proj){
-    if(proj.date&&isShred){
-      const ds=proj.date.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+    if(proj.date){
+      const dateStr=proj.date.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
       const col=proj.onTime?'#2ecc71':'#e74c3c';
-      h+=`<div class="proj"><div class="pv" style="color:${col}">${GOAL_KG}kg am ${ds}</div>
-        <div class="pd">${proj.onTime?'✓ Vor Deadline':'✗ Nach Deadline'} · ${Math.abs(proj.daysLeft)} Tage · ${proj.rate.toFixed(2)} kg/Woche · aktuell ${proj.currentW.toFixed(1)}kg</div></div>`;
-    } else if(proj.rate){
-      const col=(!isShred&&proj.rate>0)?'#2ecc71':(isShred&&proj.rate<0)?'#2ecc71':'#e74c3c';
-      h+=`<div class="proj"><div class="pv" style="color:${col}">${proj.rate>0?'+':''}${proj.rate.toFixed(2)} kg/Woche</div>
-        <div class="pd">Aktuell ${proj.currentW?proj.currentW.toFixed(1):'–'}kg${isShred?` · Ziel ${GOAL_KG}kg`:''}</div></div>`;
-    } else if(proj.msg){
+      h+=`<div class="proj"><div class="pv" style="color:${col}">${GOAL_KG}kg am ${dateStr}</div><div class="pd">${proj.onTime?'✓ Vor Deadline':'✗ Nach Deadline'} · ${Math.abs(proj.daysLeft)} Tage · ${proj.rate.toFixed(2)} kg/Woche · aktuell ${proj.currentW.toFixed(1)}kg</div></div>`;
+    } else {
       h+=`<div class="proj"><div class="pv" style="color:#f39c12">${proj.msg}</div></div>`;
     }
   }
 
-  // ─── REFEED ──────────────────────────────────────────
   const refeed=shouldRefeed();
-  if(refeed){h+=`<div class="refeed-banner"><div class="rv">⚡ REFEED</div><div class="rd">${refeed.msg}</div></div>`}
+  if(refeed){h+=`<div class="refeed-banner"><div class="rv">⚡ REFEED EMPFEHLUNG</div><div class="rd">${refeed.msg}</div></div>`}
 
-  // ─── NEXT STEP RECOMMENDATION ────────────────────────
-  if(recDir!==0){
-    const rec=getRecommendation(recDir);
-    const dir=recDir<0?'REDUZIEREN':'ERHÖHEN';
-    const col=recDir<0?'#e74c3c':'#3498db';
-    h+=`<div class="rec-box" style="border-color:${col}">
-      <div class="rec-title" style="color:${col}">→ CARBS ${dir} (${recDir<0?'':'+'}${rec.step}g/Quelle)</div>`;
-    rec.lines.forEach(l=>{
-      h+=`<div class="rec-line"><span>${l.label}: ${l.food}</span><span><span class="rec-old">${l.oldAmt}${l.unit}</span> → <span class="rec-new" style="color:${col}">${l.newAmt}${l.unit}</span></span></div>`;
-    });
-    h+=`<div class="rec-line" style="margin-top:4px;border-top:1px solid #1a1a1a;padding-top:4px"><span>Tages-kcal</span><span><span class="rec-old">${rec.oldKcal}</span> → <span class="rec-new" style="color:${col}">${rec.newKcal}</span></span></div>`;
-    h+=`<div class="rec-line"><span>Carbs/Tag</span><span><span class="rec-old">${rec.oldCarbs}g</span> → <span class="rec-new" style="color:${col}">${rec.newCarbs}g</span></span></div>`;
-    h+=`</div>`;
-  }
-
-  // ─── MEALS ───────────────────────────────────────────
   meals.forEach((meal,i)=>{
     h+=`<div class="meal"><div class="mh"><div class="mn">${i+1}. ${meal.name}</div><div class="mm">${meal.macros.kcal} kcal · <span class="cp">P${meal.macros.p}</span> <span class="cf">F${meal.macros.f}</span> <span class="ck">K${meal.macros.k}</span></div></div>`;
     meal.di.forEach(it=>{h+=`<div class="mi"><span>${esc(it.food)}${it.sw?` <button class="swap-btn" onclick="cyc('${it.sw}')">↻</button>`:''}</span><span class="mv">${esc(it.display)}</span></div>`});
     h+=`</div>`;
   });
 
-  // ─── SHOPPING ────────────────────────────────────────
-  h+=`<button class="full-btn" onclick="toggleShop()">${S.showShop?'Einkaufsliste ▴':'Einkaufsliste ×5 ▾'}</button>`;
+  h+=`<button class="full-btn" onclick="toggleShop()">${S.showShop?'Einkaufsliste ausblenden ▴':'Einkaufsliste ×5 ▾'}</button>`;
   if(S.showShop){
-    const list={};const add=(f,a,u)=>{const k=f+'|'+u;list[k]=list[k]||{food:f,amt:0,unit:u};list[k].amt+=a};
+    const list={};
+    const add=(f,a,u)=>{const k=f+'|'+u;list[k]=list[k]||{food:f,amt:0,unit:u};list[k].amt+=a};
     for(let i=0;i<5;i++){FIXED[0].items.forEach(x=>add(x.food,x.amt,x.unit));FIXED[1].items.forEach(x=>add(x.food,x.amt,x.unit));add(pA.food,pA.amt,pA.unit);add(cA.food,cA.amt,cA.unit);add(VEG3.food,VEG3.amt,VEG3.unit);add(fA.food,fA.amt,fA.unit);add(pB.food,pB.amt,pB.unit);add(cB.food,cB.amt,cB.unit);add(VEG4.food,VEG4.amt,VEG4.unit);add(fB.food,fB.amt,fB.unit)}
-    h+=`<div class="shop"><div class="sl">Einkaufsliste — 5 Tage</div>`;
+    h+=`<div class="shop"><div class="sl">Einkaufsliste — 1 Iteration (5 Tage)</div>`;
     Object.values(list).sort((a,b)=>a.food.localeCompare(b.food)).forEach(it=>{h+=`<div class="si"><span>${esc(it.food)}</span><span class="sv">${it.amt} ${esc(it.unit)}</span></div>`});
     h+=`</div>`;
   }
 
-  // ─── TRACKER ─────────────────────────────────────────
   h+=`<div class="tracker"><div class="th"><h2>5-Tage Tracker</h2><span style="font-size:12px;color:${adh>=80?'#2ecc71':adh>0?'#e74c3c':'#555'}">${adh}%</span></div>`;
+
+  h+=`<div class="nlp-box"><div class="lbl" style="margin-bottom:4px">Quick Input</div><input type="text" id="nlp-input" placeholder="z.B. 87.4 87.1 86.9 87.0 86.6 86.3" onkeydown="if(event.key==='Enter')parseNLP()"><div style="display:flex;justify-content:space-between;align-items:center"><div class="nlp-hint">6 Werte mit Leerzeichen → T0-T5</div><button onclick="parseNLP()" style="background:none;border:1px solid #333;color:#666;font-size:10px;font-family:inherit;padding:2px 8px;cursor:pointer;margin-top:4px">Parse ↵</button></div></div>`;
 
   h+=`<div class="lbl">Gewicht (morgens, nüchtern)</div><div class="wr">`;
   ['T0','T1','T2','T3','T4','T5'].forEach((l,i)=>{h+=`<div class="wi"><span>${l}</span><input type="number" step="0.1" placeholder="kg" value="${esc(S.weights[i])}" oninput="setW(${i},this.value)" onblur="render()"></div>`});
@@ -462,101 +345,70 @@ function render(){
   ['T1','T2','T3','T4','T5'].forEach((l,i)=>{h+=`<div class="wi"><span>${l}</span><input type="number" step="1" min="0" max="100" placeholder="%" value="${esc(S.recovery[i])}" oninput="setR(${i},this.value)" onblur="render()" style="width:46px;${S.recovery[i]!==''?'border-color:'+(parseInt(S.recovery[i])>=50?'#27ae60':'#c0392b'):''}"></div>`});
   h+=`</div>`;
 
-  // Live deltas
   h+=`<div style="margin-bottom:14px">`;
   for(let d=0;d<5;d++){
-    const ddd=dd(S.weights[d],S.weights[d+1]);
-    const wV=parseFloat(S.weights[d+1]);
+    const dd=dayDelta(S.weights[d],S.weights[d+1]);
+    const wVal=parseFloat(S.weights[d+1]);
     const rec=S.recovery[d]!==''?parseInt(S.recovery[d]):null;
-    if(ddd!==null){
-      const col=isShred?(parseFloat(ddd)<=0?'#2ecc71':'#e74c3c'):(parseFloat(ddd)>=0?'#2ecc71':'#e74c3c');
-      h+=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#555;padding:2px 0 2px 12px;border-left:2px solid ${col}">
-        <span>Tag ${d+1}: ${wV.toFixed(1)}kg${rec!==null?` · <span style="color:${rec>=50?'#2ecc71':'#e74c3c'}">${rec}%</span>`:''}</span>
-        <span style="color:${col};font-weight:700">${parseFloat(ddd)>0?'+':''}${ddd}kg</span>
-      </div>`;
+    if(dd!==null){
+      const col=parseFloat(dd)<=0?'#2ecc71':'#e74c3c';
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#555;padding:2px 0 2px 12px;border-left:2px solid ${col}"><span>Tag ${d+1}: ${wVal.toFixed(1)} kg${rec!==null?` · <span style="color:${rec>=50?'#2ecc71':'#e74c3c'}">${rec}%</span>`:''}</span><span style="color:${col};font-weight:700">${parseFloat(dd)>0?'+':''}${dd} kg</span></div>`;
     }
   }
   h+=`</div>`;
 
-  // Check grid
   h+=`<div class="grid"><div></div>${['M1','M2','M3','M4'].map(m=>`<div class="gl">${m}</div>`).join('')}`;
   for(let d=0;d<5;d++){h+=`<div class="gd">T${d+1}</div>`;for(let m=0;m<4;m++){h+=`<button class="gc${S.checks[d][m]?' on':''}" onclick="tgl(${d},${m})">${S.checks[d][m]?'✓':'·'}</button>`}}
   h+=`</div>`;
 
-  // Eval
-  if(evalType!=='none'){
-    const ecol=evalType==='ok'?'#2ecc71':evalType==='wait'?'#f39c12':evalType==='cut'?'#e74c3c':'#3498db';
-    const ebg=evalType==='ok'?'#0a1f0a':evalType==='wait'?'#1f1a0a':evalType==='cut'?'#1f0a0a':'#0a1a1f';
-    h+=`<div class="eval" style="background:${ebg};border:1px solid ${ecol}"><div class="ev" style="color:${ecol}">${evalMsg}</div>`;
-    if(evalType==='ok')h+=`<div class="ed">→ Weiter mit aktuellen Kalorien. Stall-Counter reset.</div>`;
-    else if(evalType==='wait')h+=`<div class="ed">→ Noch 1 Iteration. Bei erneutem Verfehlen → automatische Anpassung.</div>`;
-    else if(evalType==='cut')h+=`<div class="ed">→ Wird beim Abschließen automatisch angewendet: −${CARB_STEP}g Carbs/Quelle.</div>`;
-    else if(evalType==='add')h+=`<div class="ed">→ Wird beim Abschließen automatisch angewendet: +${CARB_STEP}g Carbs/Quelle.</div>`;
-    h+=`</div>`;
+  if(delta!==null){
+    if(onTrack) h+=`<div class="eval ok"><div class="ev" style="color:#2ecc71">${delta} kg in 5 Tagen</div><div class="ed">→ On track. Kalorien bleiben. Stall-Counter reset.</div></div>`;
+    else if(nextAct==='cut') h+=`<div class="eval no"><div class="ev" style="color:#e74c3c">${delta} kg — 2. Stall</div><div class="ed">→ Nächste Iteration: −30g Carbs/Quelle (${S.carbCut}g → ${S.carbCut+30}g unter Base).</div></div>`;
+    else h+=`<div class="eval wait"><div class="ev" style="color:#f39c12">${delta} kg — 1. Stall</div><div class="ed">→ 1 Iteration abwarten. Wenn wieder &lt;0.5kg → automatische Carb-Reduktion.</div></div>`;
   }
 
   h+=`<textarea placeholder="Notizen..." oninput="setN(this.value)">${esc(S.note)}</textarea>`;
-  h+=`<button class="full-btn" onclick="next()" style="background:#1a1a1a">Nächste Iteration →</button>`;
-  h+=`<button class="reset-progress" onclick="resetProgress()">Fortschritt zurücksetzen (Verlauf behalten)</button>`;
-  h+=`</div>`;
+  h+=`<button class="full-btn" onclick="next()" style="background:#1a1a1a">Nächste Iteration →</button></div>`;
 
-  // ─── CORRELATION ─────────────────────────────────────
-  const corr=getCorr();
+  const corr=getRecoveryCorrelation();
   if(corr){
-    h+=`<div class="corr"><div class="lbl" style="margin-bottom:6px">Whoop × Gewicht</div><div class="cv">`;
-    h+=`Ø Recovery: <span style="color:#aaa">${corr.avgAll.toFixed(0)}%</span><br>`;
-    if(corr.lc>0&&corr.hc>0){
-      h+=`&lt;50%: <span style="color:#e74c3c">${corr.lowAvg.toFixed(2)}kg/Iter</span> (n=${corr.lc})<br>`;
-      h+=`≥50%: <span style="color:#2ecc71">${corr.highAvg.toFixed(2)}kg/Iter</span> (n=${corr.hc})<br>`;
-    }
-    if(corr.totalStalls>0)h+=`Stalls bei niedriger Recovery: <span style="color:#f39c12">${corr.stallsLow}/${corr.totalStalls}</span>`;
+    h+=`<div class="corr"><div class="lbl" style="margin-bottom:6px">Whoop × Gewicht Korrelation</div><div class="cv">Ø Recovery: <span style="color:#aaa">${corr.avgRecAll.toFixed(0)}%</span><br>`;
+    if(corr.lowCount>0&&corr.highCount>0){h+=`Recovery &lt;50%: <span style="color:#e74c3c">${corr.lowAvg.toFixed(2)} kg/Iter</span> (n=${corr.lowCount})<br>Recovery ≥50%: <span style="color:#2ecc71">${corr.highAvg.toFixed(2)} kg/Iter</span> (n=${corr.highCount})<br>`}
+    if(corr.totalStalls>0){h+=`Stalls mit niedriger Recovery: <span style="color:#f39c12">${corr.stallsWithLowRec}/${corr.totalStalls}</span>`}
     h+=`</div></div>`;
   }
 
-  // ─── HISTORY ─────────────────────────────────────────
   if(S.history.length>0){
     h+=`<div class="history"><h2>Verlauf</h2>`;
     const allW=S.history.flatMap(x=>(x.weights||[]).filter(w=>w!=='').map(Number)).filter(n=>!isNaN(n));
     if(allW.length>=2){
       const mn=Math.min(...allW)-.5,mx=Math.max(...allW)+.5,w=680,hh=80;
       const pts=allW.map((v,i)=>`${(i/(allW.length-1))*w},${hh-((v-mn)/(mx-mn))*hh}`).join(' ');
-      h+=`<div class="hl">Gewichtstrend</div><svg viewBox="-4 -4 ${w+8} ${hh+20}" style="width:100%;height:auto;margin-bottom:14px"><polyline points="${pts}" fill="none" stroke="${modeCol}" stroke-width="2"/>`;
-      allW.forEach((v,i)=>{h+=`<circle cx="${(i/(allW.length-1))*w}" cy="${hh-((v-mn)/(mx-mn))*hh}" r="3" fill="${modeCol}"/>`});
+      h+=`<div class="hl">Gewichtstrend</div><svg viewBox="-4 -4 ${w+8} ${hh+20}" style="width:100%;height:auto;margin-bottom:14px"><polyline points="${pts}" fill="none" stroke="#e74c3c" stroke-width="2"/>`;
+      allW.forEach((v,i)=>{h+=`<circle cx="${(i/(allW.length-1))*w}" cy="${hh-((v-mn)/(mx-mn))*hh}" r="3" fill="#e74c3c"/>`});
       h+=`<text x="0" y="${hh+14}" fill="#555" font-size="9" font-family="inherit">${mn.toFixed(1)}</text><text x="${w}" y="${hh+14}" fill="#555" font-size="9" font-family="inherit" text-anchor="end">${mx.toFixed(1)}</text></svg>`;
     }
-
     [...S.history].reverse().forEach(x=>{
       const isExp=S.expandedIter===x.iteration;
-      const modeLabel=x.mode==='bulk'?'B':'S';
-      const goalMet=isShred?(x.delta!==null&&parseFloat(x.delta)<=SHRED_TARGET):(x.delta!==null&&parseFloat(x.delta)>=BULK_MIN&&parseFloat(x.delta)<=BULK_MAX);
+      const goalMet=x.delta!==null&&parseFloat(x.delta)<=-0.5;
       const goalCol=goalMet?'#2ecc71':'#e74c3c';
       const avgRec=x.recovery?(()=>{const r=x.recovery.map(Number).filter(n=>!isNaN(n));return r.length?Math.round(r.reduce((a,b)=>a+b,0)/r.length):null})():null;
-
-      h+=`<div class="hi"><div class="hi-head" onclick="toggleHist(${x.iteration})">
-        <span><span style="color:${x.mode==='bulk'?'#2ecc71':'#e74c3c'};font-size:9px">${modeLabel}</span> #${x.iteration} — ${x.date}${x.action==='cut'?' ✂':x.action==='add'?' ➕':''}</span>
-        <span>
-          <span style="color:${goalCol}">${x.delta!==null?(parseFloat(x.delta)>0?'+':'')+x.delta:'–'}kg</span>
-          ${goalMet?'<span style="font-size:9px;color:#2ecc71"> ✓</span>':'<span style="font-size:9px;color:#e74c3c"> ✗</span>'}
-          ${avgRec!==null?` · <span style="color:${avgRec>=50?'#2ecc71':'#e74c3c'}">${avgRec}%R</span>`:''}
-           · ${x.adherence}% · ${x.kcal}kcal${x.carbAdj&&x.carbAdj!==0?` · ${x.carbAdj>0?'+':''}${x.carbAdj}g`:''}
-          <span style="color:#333;margin-left:4px">${isExp?'▴':'▾'}</span>
-        </span></div>`;
-
+      h+=`<div class="hi"><div class="hi-head" onclick="toggleHist(${x.iteration})"><span>#${x.iteration} — ${x.date}${x.action==='cut'?' ✂':''}</span><span><span style="color:${goalCol}">${x.delta??'–'}kg</span>${goalMet?'<span style="color:#2ecc71;font-size:9px"> ✓</span>':'<span style="color:#e74c3c;font-size:9px"> ✗</span>'}${avgRec!==null?` · <span style="color:${avgRec>=50?'#2ecc71':'#e74c3c'}">${avgRec}%R</span>`:''} · ${x.adherence}% · ${x.kcal}kcal${x.carbCut>0?` · −${x.carbCut}g`:''}<span style="color:#333;margin-left:4px">${isExp?'▴':'▾'}</span></span></div>`;
       if(isExp){
         h+=`<div style="padding:0 0 8px 0">`;
         const ws=x.weights||[],recs=x.recovery||[];
         for(let d=0;d<5;d++){
-          const ddd=dd(ws[d],ws[d+1]);const wV=parseFloat(ws[d+1]);const rec=recs[d]!==undefined&&recs[d]!==''?parseInt(recs[d]):null;
-          if(!isNaN(wV)){
-            const col=ddd!==null?(isShred?(parseFloat(ddd)<=0?'#2ecc71':'#e74c3c'):(parseFloat(ddd)>=0?'#2ecc71':'#e74c3c')):'#333';
-            h+=`<div class="hi-day" style="border-left-color:${col}"><span style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:${col}"></span>Tag ${d+1}: <span style="color:#aaa">${wV.toFixed(1)}kg</span>${rec!==null?`<span style="color:${rec>=50?'#2ecc71':'#e74c3c'};font-size:9px">${rec}%</span>`:''}</span>
-              <span style="color:${col};font-weight:700">${ddd!==null?((parseFloat(ddd)>0?'+':'')+ddd+'kg'):'–'}</span></div>`;
+          const dd=dayDelta(ws[d],ws[d+1]),wVal=parseFloat(ws[d+1]);
+          const rec=recs[d]!==undefined&&recs[d]!==''?parseInt(recs[d]):null;
+          if(!isNaN(wVal)){
+            const col=dd!==null?(parseFloat(dd)<=0?'#2ecc71':'#e74c3c'):'#333';
+            h+=`<div class="hi-day" style="border-left-color:${col}"><span style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:${col}"></span>Tag ${d+1}: <span style="color:#aaa">${wVal.toFixed(1)} kg</span>${rec!==null?`<span style="color:${rec>=50?'#2ecc71':'#e74c3c'};font-size:9px">${rec}%</span>`:''}</span><span style="color:${col};font-weight:700">${dd!==null?((parseFloat(dd)>0?'+':'')+dd+' kg'):'–'}</span></div>`;
           }
         }
         const tS=parseFloat(ws[0]),tE=parseFloat(ws[5]);
         if(!isNaN(tS)&&!isNaN(tE)){
-          const td=(tE-tS).toFixed(1);const tc=goalMet?'#2ecc71':'#e74c3c';
-          h+=`<div style="display:flex;justify-content:space-between;font-size:10px;padding:6px 0 2px 12px;border-left:2px solid ${tc};margin-top:4px;color:#888"><span style="font-weight:700">${tS.toFixed(1)} → ${tE.toFixed(1)}kg</span><span style="color:${tc};font-weight:700">${parseFloat(td)>0?'+':''}${td}kg ${goalMet?'✓':'✗'}</span></div>`;
+          const td=(tE-tS).toFixed(1),tc=parseFloat(td)<=-0.5?'#2ecc71':'#e74c3c';
+          h+=`<div style="display:flex;justify-content:space-between;font-size:10px;padding:6px 0 2px 12px;border-left:2px solid ${tc};margin-top:4px;color:#888"><span style="font-weight:700">Gesamt: ${tS.toFixed(1)} → ${tE.toFixed(1)} kg</span><span style="color:${tc};font-weight:700">${parseFloat(td)>0?'+':''}${td} kg ${parseFloat(td)<=-0.5?'✓':'✗'}</span></div>`;
         }
         if(x.note){h+=`<div style="font-size:10px;color:#444;padding:4px 0 0 12px;font-style:italic">${esc(x.note)}</div>`}
         h+=`</div>`;
@@ -566,101 +418,223 @@ function render(){
     h+=`</div>`;
   }
 
-  // ─── RULES ───────────────────────────────────────────
-  h+=`<div style="background:#0d0d0d;border:1px dashed #1a1a1a;padding:12px 18px;margin-top:16px;font-size:10px;color:#333;line-height:1.6">
-    <strong style="color:#444">${isShred?'SHRED':'BULK'} ALGORITHMUS</strong><br>
-    ${isShred?`≥0.5kg Verlust/5d → weiter<br>&lt;0.5kg (1×) → abwarten<br>&lt;0.5kg (2×) → −${CARB_STEP}g Carbs/Quelle (auto)<br>4+ on track → Refeed<br>Manuell: ±${MANUAL_STEP}g jederzeit`
-    :`+0.15 bis +0.35kg/5d → Sweet Spot<br>&gt;0.35kg (1×) → abwarten, (2×) → −${CARB_STEP}g (auto)<br>&lt;0.15kg (1×) → abwarten, (2×) → +${CARB_STEP}g (auto)<br>Manuell: ±${MANUAL_STEP}g jederzeit`}
-  </div>`;
-  h+=`<div class="footer"><div class="fr">adj: ${S.carbAdj>0?'+':''}${S.carbAdj}g · stalls: ${S.stallCount}/2${isShred?` · streak: ${S.consecutiveOk}`:''}</div><button onclick="resetAll()">reset all</button></div>`;
+  h+=`<div style="background:#0d0d0d;border:1px dashed #1a1a1a;padding:12px 18px;margin-top:16px;font-size:10px;color:#333;line-height:1.6"><strong style="color:#444">REGELN</strong><br>≥0.5kg/5d → weiter, Stall reset<br>&lt;0.5kg (1×) → abwarten<br>&lt;0.5kg (2×) → −30g Carbs/Quelle<br>4+ Iterationen on track → Refeed-Empfehlung</div>`;
+  h+=`<div class="footer"><div class="fr">carbCut: ${S.carbCut}g · stalls: ${S.stallCount}/2 · streak: ${S.consecutiveOk}</div><button onclick="resetAll()">reset all</button></div>`;
+  return h;
+}
 
+// ─── RENDER MAHLZEITEN ──────────────────────────────────
+function renderMahlzeiten(){
+  const pA=PROTEIN_A[S.swapPA],pB=PROTEIN_B[S.swapPB];
+  const cA=getCarb(S.swapCA,S.carbCut),cB=getCarb(S.swapCB,S.carbCut);
+  const fA=FAT_OPT[S.swapFA],fB=FAT_OPT[S.swapFB];
+  const m3=mSum(pA,cA,VEG3,fA),m4=mSum(pB,cB,VEG4,fB);
+
+  const MEAL_DEFS=[
+    {name:"Porridge",    macros:FIXED[0].macros},
+    {name:"Skyr Bowl",   macros:FIXED[1].macros},
+    {name:"Deftig I",    macros:m3},
+    {name:"Deftig II",   macros:m4}
+  ];
+  const target=MEAL_DEFS.reduce((a,m)=>({kcal:a.kcal+m.macros.kcal,p:a.p+m.macros.p,f:a.f+m.macros.f,k:a.k+m.macros.k}),{kcal:0,p:0,f:0,k:0});
+
+  const offset=S.mealWeekOffset||0;
+  const days=getWeekDays(offset);
+  const today=dateKey(new Date());
+  const kw=getISOWeek(days[0]);
+  const weekLabel=`KW ${kw} · ${days[0].toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})} – ${days[6].toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'})}`;
+
+  let h=``;
+
+  // Week nav
+  h+=`<div class="mp-weeknav">
+    <button onclick="shiftWeek(-1)">◀</button>
+    <span style="font-size:11px;color:#555">${weekLabel}</span>
+    <button onclick="shiftWeek(1)" ${offset>=0?'disabled':''}>▶</button>
+  </div>`;
+
+  // Daily target bar
+  h+=`<div class="mp-target">
+    <span style="color:#888;font-weight:700">Tagesziel</span>
+    <span style="color:#fff">${target.kcal} kcal</span>
+    <span class="cp">P ${target.p}g</span>
+    <span class="cf">F ${target.f}g</span>
+    <span class="ck">K ${target.k}g</span>
+    ${S.carbCut>0?`<span style="color:#e74c3c;font-size:9px">−${S.carbCut}g Carbs aktiv</span>`:''}
+  </div>`;
+
+  // Days
+  const DAY_NAMES=['Mo','Di','Mi','Do','Fr','Sa','So'];
+  days.forEach((day,di)=>{
+    const dk=dateKey(day);
+    const checked=(S.mealLog&&S.mealLog[dk])?S.mealLog[dk]:[false,false,false,false];
+    const isToday=dk===today;
+    const isFuture=new Date(dk)>new Date(today);
+    const dayName=DAY_NAMES[di];
+    const dayDate=day.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
+
+    const eaten=checked.reduce((a,c,i)=>c?{kcal:a.kcal+MEAL_DEFS[i].macros.kcal,p:a.p+MEAL_DEFS[i].macros.p,f:a.f+MEAL_DEFS[i].macros.f,k:a.k+MEAL_DEFS[i].macros.k}:a,{kcal:0,p:0,f:0,k:0});
+    const checkedCount=checked.filter(Boolean).length;
+    const anyChecked=checkedCount>0;
+    const allChecked=checkedCount===4;
+    const pct=Math.round(eaten.kcal/target.kcal*100);
+    const pctCol=pct>=95?'#2ecc71':pct>50?'#f39c12':'#e74c3c';
+
+    h+=`<div class="mp-day${isToday?' today':''}">
+      <div class="mp-day-head">
+        <div>
+          <span style="font-size:13px;font-weight:700;color:${isToday?'#fff':isFuture?'#333':'#777'}">${dayName}</span>
+          <span style="font-size:11px;color:#333;margin-left:6px">${dayDate}</span>
+          ${isToday?`<span style="font-size:9px;color:#555;margin-left:6px;padding:1px 5px;border:1px solid #2a2a2a">HEUTE</span>`:''}
+        </div>
+        <div style="text-align:right;font-size:10px">
+          ${anyChecked
+            ?`<span style="color:${pctCol}">${eaten.kcal} kcal <span style="color:#333">/</span> ${pct}%</span>`
+            :`<span style="color:#222">–</span>`}
+        </div>
+      </div>`;
+
+    // Progress bar
+    if(anyChecked){
+      h+=`<div class="mp-pbar"><div class="mp-pbar-fill" style="width:${Math.min(pct,100)}%;background:${pctCol}"></div></div>`;
+    }
+
+    // 2×2 meal grid
+    h+=`<div class="mp-meals">`;
+    MEAL_DEFS.forEach((meal,i)=>{
+      const isChecked=checked[i];
+      h+=`<button class="mp-meal-btn${isChecked?' checked':''}" onclick="toggleMeal('${dk}',${i})">
+        <span style="display:flex;align-items:center;gap:5px">
+          <span style="font-size:9px;width:10px">${isChecked?'✓':''}</span>
+          <span>${meal.name}</span>
+        </span>
+        <span style="font-size:9px;color:${isChecked?'#2ecc71':'#2a2a2a'}">${meal.macros.kcal}</span>
+      </button>`;
+    });
+    h+=`</div>`;
+
+    // Macro breakdown when anything eaten
+    if(anyChecked){
+      h+=`<div class="mp-day-macros">
+        <span class="cp">P ${eaten.p}<span style="color:#2a2a2a">/${target.p}g</span></span>
+        <span class="cf">F ${eaten.f}<span style="color:#2a2a2a">/${target.f}g</span></span>
+        <span class="ck">K ${eaten.k}<span style="color:#2a2a2a">/${target.k}g</span></span>
+        <span style="color:${allChecked?'#2ecc71':'#333'}">${checkedCount}/4 ${allChecked?'✓':''}</span>
+      </div>`;
+    }
+    h+=`</div>`;
+  });
+
+  // Weekly summary
+  const weekTotals=days.reduce((acc,day)=>{
+    const dk=dateKey(day);
+    const checked=(S.mealLog&&S.mealLog[dk])?S.mealLog[dk]:[false,false,false,false];
+    const eaten=checked.reduce((a,c,i)=>c?{kcal:a.kcal+MEAL_DEFS[i].macros.kcal,p:a.p+MEAL_DEFS[i].macros.p,meals:a.meals+1}:a,{kcal:0,p:0,meals:0});
+    return{kcal:acc.kcal+eaten.kcal,p:acc.p+eaten.p,meals:acc.meals+eaten.meals};
+  },{kcal:0,p:0,meals:0});
+
+  const weekAdh=Math.round(weekTotals.meals/28*100);
+  const adhCol=weekAdh>=80?'#2ecc71':weekAdh>50?'#f39c12':'#e74c3c';
+
+  h+=`<div class="mp-week-summary">
+    <div class="lbl" style="margin-bottom:10px">Woche</div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:22px;font-weight:700;color:${adhCol}">${weekAdh}%</div>
+        <div style="font-size:10px;color:#444;margin-top:2px">${weekTotals.meals} / 28 Mahlzeiten</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:13px;font-weight:700;color:#888">${weekTotals.kcal.toLocaleString('de')} kcal</div>
+        <div style="font-size:10px;color:#444;margin-top:2px">Ø ${Math.round(weekTotals.kcal/7)} kcal/Tag</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:13px;font-weight:700;color:#e74c3c">${weekTotals.p}g</div>
+        <div style="font-size:10px;color:#444;margin-top:2px">Protein gesamt</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Footer
+  h+=`<div class="footer"><div class="fr">meal log: ${Object.keys(S.mealLog||{}).length} Tage</div><button onclick="resetAll()">reset all</button></div>`;
+  return h;
+}
+
+// ─── RENDER (main) ──────────────────────────────────────
+function render(){
+  const tab=S.activeTab||'protokoll';
+  let h=`<div class="header"><h1>CUT PROTOCOL</h1><span class="iter">#${S.iteration}</span><div class="meta"><span>${START_KG}kg → ${GOAL_KG}kg</span><span>${START_KFA}% → ${GOAL_KFA}% KFA</span><span>Deadline 04.08.2026</span></div></div>`;
+
+  h+=`<div class="tabs">
+    <button class="tab-btn${tab==='protokoll'?' active':''}" onclick="setTab('protokoll')">PROTOKOLL</button>
+    <button class="tab-btn${tab==='mahlzeiten'?' active':''}" onclick="setTab('mahlzeiten')">MAHLZEITEN</button>
+  </div>`;
+
+  h+=(tab==='protokoll')?renderProtokoll():renderMahlzeiten();
   document.getElementById('app').innerHTML=h;
 }
 
 // ─── ACTIONS ────────────────────────────────────────────
+function setTab(t){S.activeTab=t;scheduleSave();render();window.scrollTo(0,0)}
 function cyc(t){const m={pA:['swapPA',PROTEIN_A.length],pB:['swapPB',PROTEIN_B.length],cA:['swapCA',CARB_BASE.length],cB:['swapCB',CARB_BASE.length],fA:['swapFA',FAT_OPT.length],fB:['swapFB',FAT_OPT.length]};const[k,l]=m[t];S[k]=(S[k]+1)%l;scheduleSave();render()}
 function toggleShop(){S.showShop=!S.showShop;render()}
-let rt=null;
-function setW(i,v){S.weights[i]=v;scheduleSave();if(rt)clearTimeout(rt);rt=setTimeout(()=>{const ae=document.activeElement;if(!ae||ae.tagName!=='INPUT')render()},800)}
-function setR(i,v){S.recovery[i]=v;scheduleSave();if(rt)clearTimeout(rt);rt=setTimeout(()=>{const ae=document.activeElement;if(!ae||ae.tagName!=='INPUT')render()},800)}
+
+function toggleMeal(dk,i){
+  if(!S.mealLog)S.mealLog={};
+  if(!S.mealLog[dk])S.mealLog[dk]=[false,false,false,false];
+  S.mealLog[dk][i]=!S.mealLog[dk][i];
+  scheduleSave();render();
+}
+function shiftWeek(dir){
+  S.mealWeekOffset=Math.min(0,(S.mealWeekOffset||0)+dir);
+  scheduleSave();render();
+}
+
+let renderTimer=null;
+function setW(i,v){S.weights[i]=v;scheduleSave();if(renderTimer)clearTimeout(renderTimer);renderTimer=setTimeout(()=>{const ae=document.activeElement;if(!ae||ae.tagName!=='INPUT'||ae.type!=='number')render()},800)}
+function setR(i,v){S.recovery[i]=v;scheduleSave();if(renderTimer)clearTimeout(renderTimer);renderTimer=setTimeout(()=>{const ae=document.activeElement;if(!ae||ae.tagName!=='INPUT'||ae.type!=='number')render()},800)}
 function setN(v){S.note=v;scheduleSave()}
 function tgl(d,m){S.checks[d][m]=!S.checks[d][m];scheduleSave();render()}
 function toggleHist(iter){S.expandedIter=S.expandedIter===iter?null:iter;render()}
 
-function setMode(m){
-  if(m===S.mode)return;
-  if(!confirm(`Zu ${m.toUpperCase()} wechseln? Verlauf bleibt, Fortschritt (Stalls, Carb-Adj, Streak) wird zurückgesetzt.`))return;
-  S.mode=m;
-  S.carbAdj=0;S.stallCount=0;S.consecutiveOk=0;
-  S.iteration=1;
-  S.checks=Array.from({length:5},()=>Array(4).fill(false));
-  S.weights=Array(6).fill("");S.recovery=Array(5).fill("");S.note="";
-  scheduleSave();render();
-}
-
-function resetProgress(){
-  if(!confirm('Fortschritt zurücksetzen? Carb-Adj, Stalls und Streak auf 0. Verlauf bleibt.'))return;
-  S.carbAdj=0;S.stallCount=0;S.consecutiveOk=0;
-  scheduleSave();render();
+function parseNLP(){
+  const el=document.getElementById('nlp-input');if(!el)return;
+  const nums=el.value.trim().split(/[\s,;]+/).map(s=>parseFloat(s.replace(',','.'))).filter(n=>!isNaN(n));
+  if(nums.length>=1){for(let i=0;i<Math.min(nums.length,6);i++){S.weights[i]=nums[i].toString()}scheduleSave();render()}
 }
 
 function next(){
   const sW=parseFloat(S.weights[0]),eW=parseFloat(S.weights[5]);
   const delta=(!isNaN(sW)&&!isNaN(eW))?(eW-sW).toFixed(1):null;
-  const dv=delta!==null?parseFloat(delta):null;
   const adh=Math.round(S.checks.flat().filter(Boolean).length/20*100);
-  const kcal=getTotals().kcal;
-  const isShred=S.mode==='shred';
-
+  const cA=getCarb(S.swapCA,S.carbCut),cB=getCarb(S.swapCB,S.carbCut);
+  const kcal=[FIXED[0].macros,FIXED[1].macros,mSum(PROTEIN_A[S.swapPA],cA,VEG3,FAT_OPT[S.swapFA]),mSum(PROTEIN_B[S.swapPB],cB,VEG4,FAT_OPT[S.swapFB])].reduce((a,m)=>a+m.kcal,0);
   let action='ok';
-
-  if(isShred){
-    if(delta===null||dv<=SHRED_TARGET){
-      S.stallCount=0;S.consecutiveOk++;action='ok';
-    } else {
-      S.stallCount++;S.consecutiveOk=0;
-      if(S.stallCount>=2){S.carbAdj-=CARB_STEP;S.stallCount=0;action='cut'}
-      else{action='wait'}
-    }
-  } else { // bulk
-    if(delta===null){action='ok'}
-    else if(dv>=BULK_MIN&&dv<=BULK_MAX){
-      S.stallCount=0;action='ok';
-    } else if(dv>BULK_MAX){
-      S.stallCount++;
-      if(S.stallCount>=2){S.carbAdj-=CARB_STEP;S.stallCount=0;action='cut'}
-      else{action='wait'}
-    } else { // too little gain
-      S.stallCount++;
-      if(S.stallCount>=2){S.carbAdj+=CARB_STEP;S.stallCount=0;action='add'}
-      else{action='wait'}
-    }
-  }
-
-  S.history.push({iteration:S.iteration,mode:S.mode,date:new Date().toISOString().slice(0,10),weights:[...S.weights],recovery:[...S.recovery],delta,adherence:adh,note:S.note,kcal,carbAdj:S.carbAdj,action});
+  const lost=delta!==null?parseFloat(delta):0;
+  if(delta===null||lost<=-0.5){S.stallCount=0;S.consecutiveOk++;action='ok'}
+  else{S.stallCount++;S.consecutiveOk=0;if(S.stallCount>=2){S.carbCut+=30;S.stallCount=0;action='cut'}else{action='wait'}}
+  S.history.push({iteration:S.iteration,date:new Date().toISOString().slice(0,10),weights:[...S.weights],recovery:[...S.recovery],delta,adherence:adh,note:S.note,kcal,carbCut:S.carbCut,action});
   S.iteration++;
   S.checks=Array.from({length:5},()=>Array(4).fill(false));
   S.weights=Array(6).fill("");S.recovery=Array(5).fill("");S.note="";S.expandedIter=null;
-  scheduleSave();render();
-  window.scrollTo(0,0);
+  scheduleSave();render();window.scrollTo(0,0);
 }
 
 async function resetAll(){
-  if(!confirm('ALLES löschen? Verlauf, Einstellungen, komplett.'))return;
+  if(!confirm('Alle Daten unwiderruflich löschen?'))return;
   try{await dbDel('state')}catch(e){}
-  S=DEFAULT_STATE();render();
+  S={iteration:1,activeTab:'protokoll',checks:Array.from({length:5},()=>Array(4).fill(false)),weights:Array(6).fill(""),recovery:Array(5).fill(""),note:"",history:[],swapPA:0,swapPB:0,swapCA:0,swapCB:2,swapFA:0,swapFB:0,carbCut:0,stallCount:0,consecutiveOk:0,showShop:false,expandedIter:null,mealLog:{},mealWeekOffset:0};
+  render();
 }
 
 // ─── INIT ───────────────────────────────────────────────
 (async()=>{
   try{const saved=await dbGet('state');if(saved){
-    if(!saved.mode)saved.mode='shred';
     if(!saved.recovery)saved.recovery=Array(5).fill("");
     if(saved.consecutiveOk===undefined)saved.consecutiveOk=0;
     if(saved.expandedIter===undefined)saved.expandedIter=null;
-    // Migrate from carbCut to carbAdj
-    if(saved.carbCut!==undefined&&saved.carbAdj===undefined){saved.carbAdj=-saved.carbCut;delete saved.carbCut}
-    if(saved.carbAdj===undefined)saved.carbAdj=0;
+    if(!saved.activeTab)saved.activeTab='protokoll';
+    if(!saved.mealLog)saved.mealLog={};
+    if(saved.mealWeekOffset===undefined)saved.mealWeekOffset=0;
     Object.assign(S,saved);
   }}catch(e){}
   render();
